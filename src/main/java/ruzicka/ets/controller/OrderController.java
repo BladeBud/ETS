@@ -4,11 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ruzicka.ets.db.Objednavka;
 import ruzicka.ets.db.misto;
 import ruzicka.ets.dto.EventInfoDTO;
-import ruzicka.ets.dto.OrderResponseDTO;
-import ruzicka.ets.repository.ObjednavkaRepository;
 import ruzicka.ets.repository.MistoRepository;
 
 import java.util.List;
