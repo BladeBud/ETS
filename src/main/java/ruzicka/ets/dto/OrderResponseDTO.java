@@ -39,7 +39,7 @@ public class OrderResponseDTO {
         return cena;
     }
 
-    public void setCena(Double cena) {
-        this.cena = cena;
+    public void setCena(Integer cena) {
+       this.cena = cena.doubleValue();
     }
 }

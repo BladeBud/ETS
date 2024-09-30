@@ -34,7 +34,7 @@ public class OrderController {
         response.setIdzakzanika(objednavka.getId());
         response.setAdresa(misto.getAdresa());
         response.setAvaiablequantity(misto.getAvaiablequantity());
-        response.setCena(100.0);
+        response.setCena(objednavka.getCena());
 
         return response;
     }
