@@ -6,22 +6,17 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ruzicka.ets.controller.OrderController;
-import ruzicka.ets.db.Objednavka;
 import ruzicka.ets.db.misto;
-import ruzicka.ets.repository.ObjednavkaRepository;
 import ruzicka.ets.repository.MistoRepository;
 
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * @author czech
- * @since 2023-09-30
- */
 @WebMvcTest(OrderController.class)
 public class OrderControllerTest {
 
@@ -29,27 +24,29 @@ public class OrderControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private ObjednavkaRepository objednavkaRepository;
-
-    @MockBean
     private MistoRepository mistoRepository;
 
     @Test
-    public void testGetOrderDetails() throws Exception {
-        Objednavka objednavka = new Objednavka();
-        objednavka.setId(1);
-        misto misto = new misto();
-        misto.setAdresa(123);
-        misto.setAvaiablequantity(50);
-        objednavka.setIdmisto(misto);
+    public void testGetEventInfo() throws Exception {
+        misto misto1 = new misto();
+        misto1.setAdresa(123);
+        misto1.setAvaiablequantity(50);
 
-        when(objednavkaRepository.findById(1)).thenReturn(Optional.of(objednavka));
+        misto misto2 = new misto();
+        misto2.setAdresa(123);
+        misto2.setAvaiablequantity(30);
 
-        mockMvc.perform(get("/order").param("orderId", "1"))
+        List<misto> mistoList = Arrays.asList(misto1, misto2);
+
+        when(mistoRepository.findByAdresaAndAvaiablequantity(123, 50)).thenReturn(mistoList);
+
+        mockMvc.perform(get("/event-info")
+                        .param("adresa", "123")
+                        .param("quantityavaiable", "50"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.idzakzanika").value(1))
-                .andExpect(jsonPath("$.adresa").value(123))
-                .andExpect(jsonPath("$.avaiablequantity").value(50))
-                .andExpect(jsonPath("$.cena").value(100.0));
+                .andExpect(jsonPath("$[0].adresa").value(123))
+                .andExpect(jsonPath("$[0].avaiablequantity").value(50))
+                .andExpect(jsonPath("$[1].adresa").value(123))
+                .andExpect(jsonPath("$[1].avaiablequantity").value(30));
     }
 }
