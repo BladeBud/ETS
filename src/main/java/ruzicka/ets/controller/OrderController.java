@@ -32,6 +32,8 @@ public class OrderController {
             EventInfoDTO response = new EventInfoDTO();
             response.setAdresa(misto.getAdresa());
             response.setAvaiablequantity(misto.getAvaiablequantity());
+//            response.setIdzakaznik(objednavka.getIdzakaznik());
+            response.setCena(misto.getIdtypmista().getCena());
             return response;
         }).collect(Collectors.toList());
     }

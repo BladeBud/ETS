@@ -7,6 +7,8 @@ package ruzicka.ets.dto;
 public class EventInfoDTO {
     private Integer adresa;
     private Integer avaiablequantity;
+    private Integer idzakaznik;
+    private Integer cena;
 
     public Integer getAdresa() {
         return adresa;
@@ -22,5 +24,21 @@ public class EventInfoDTO {
 
     public void setAvaiablequantity(Integer avaiablequantity) {
         this.avaiablequantity = avaiablequantity;
+    }
+
+    public Integer getIdzakaznik() {
+        return idzakaznik;
+    }
+
+    public void setIdzakaznik(Integer idzakaznik) {
+        this.idzakaznik = idzakaznik;
+    }
+
+    public Integer getCena() {
+        return cena;
+    }
+
+    public void setCena(Integer cena) {
+        this.cena = cena;
     }
 }
