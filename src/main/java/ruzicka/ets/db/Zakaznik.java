@@ -31,6 +31,17 @@ public class Zakaznik {
     @OneToMany(mappedBy = "idzakaznik")
     private Set<Objednavka> objednavkas = new LinkedHashSet<>();
 
+    @Column(name = "status", length = 3)
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public Set<Objednavka> getObjednavkas() {
         return objednavkas;
     }
