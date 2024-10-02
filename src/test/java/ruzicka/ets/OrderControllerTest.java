@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ruzicka.ets.controller.OrderController;
+import ruzicka.ets.db.Typmista;
 import ruzicka.ets.db.misto;
 import ruzicka.ets.repository.MistoRepository;
 
@@ -28,25 +29,24 @@ public class OrderControllerTest {
 
     @Test
     public void testGetEventInfo() throws Exception {
+        Typmista typmista = new Typmista();
+        typmista.setCena(100.0);
+
         misto misto1 = new misto();
         misto1.setAdresa(123);
         misto1.setAvaiablequantity(50);
+        misto1.setIdtypmista(typmista);
 
-        misto misto2 = new misto();
-        misto2.setAdresa(123);
-        misto2.setAvaiablequantity(30);
-
-        List<misto> mistoList = Arrays.asList(misto1, misto2);
+        List<misto> mistoList = Arrays.asList(misto1);
 
         when(mistoRepository.findByAdresaAndAvaiablequantity(123, 50)).thenReturn(mistoList);
 
-        mockMvc.perform(get("/event-info")
+        mockMvc.perform(get("/misto")
                         .param("adresa", "123")
                         .param("quantityavaiable", "50"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].adresa").value(123))
                 .andExpect(jsonPath("$[0].avaiablequantity").value(50))
-                .andExpect(jsonPath("$[1].adresa").value(123))
-                .andExpect(jsonPath("$[1].avaiablequantity").value(30));
+                .andExpect(jsonPath("$[0].cena").value(100.0));
     }
 }

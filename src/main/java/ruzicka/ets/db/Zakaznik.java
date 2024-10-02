@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -33,6 +34,17 @@ public class Zakaznik {
 
     @Column(name = "status", length = 3)
     private String status;
+
+    @Column(name = "caspotvrzeni")
+    private Instant caspotvrzeni;
+
+    public Instant getCaspotvrzeni() {
+        return caspotvrzeni;
+    }
+
+    public void setCaspotvrzeni(Instant caspotvrzeni) {
+        this.caspotvrzeni = caspotvrzeni;
+    }
 
     public String getStatus() {
         return status;

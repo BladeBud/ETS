@@ -25,7 +25,7 @@ public class OrderController {
     @Autowired
     private MistoRepository mistoRepository;
 
-    @GetMapping("/event-info")
+    @GetMapping("/misto")
     public List<EventInfoDTO> getEventInfo(@RequestParam Integer adresa, @RequestParam Integer quantityavaiable) {
         List<misto> mistoList = mistoRepository.findByAdresaAndAvaiablequantity(adresa, quantityavaiable);
         return mistoList.stream().map(misto -> {
