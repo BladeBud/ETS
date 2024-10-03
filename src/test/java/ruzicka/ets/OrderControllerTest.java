@@ -30,23 +30,23 @@ public class OrderControllerTest {
     @Test
     public void testGetEventInfo() throws Exception {
         Typmista typmista = new Typmista();
-        typmista.setCena(100.0);
+        typmista.setCena(100);
 
         misto misto1 = new misto();
         misto1.setAdresa(123);
-        misto1.setAvaiablequantity(50);
+        misto1.setAvailableQuantity(50);
         misto1.setIdtypmista(typmista);
 
         List<misto> mistoList = Arrays.asList(misto1);
 
-        when(mistoRepository.findByAdresaAndAvaiablequantity(123, 50)).thenReturn(mistoList);
+        when(mistoRepository.findByAdresaAndAvailableQuantity(123, 50)).thenReturn(mistoList);
 
         mockMvc.perform(get("/misto")
                         .param("adresa", "123")
                         .param("quantityavaiable", "50"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].adresa").value(123))
-                .andExpect(jsonPath("$[0].avaiablequantity").value(50))
-                .andExpect(jsonPath("$[0].cena").value(100.0));
+                .andExpect(jsonPath("$[0].avaiableQuantity").value(50))
+                .andExpect(jsonPath("$[0].cena").value(100));
     }
 }

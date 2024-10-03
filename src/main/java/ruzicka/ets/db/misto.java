@@ -8,11 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 /**
  * @author czech
@@ -21,59 +17,31 @@ import java.util.Set;
 @Entity
 @Table(name = "misto")
 public class misto {
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "idmisto", nullable = false)
-    private Integer id;
+    private Integer idmisto;
 
     @Column(name = "adresa", nullable = false)
     private Integer adresa;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idtypmista", nullable = false)
     private Typmista idtypmista;
 
     @Column(name = "avaiablequantity", nullable = false)
-    private Integer avaiablequantity;
+    private Integer availableQuantity;
 
     @Column(name = "quantitysum", nullable = false)
-    private Integer quantitysum;
+    private Integer quantitySum;
 
-    @OneToMany(mappedBy = "idmisto")
-    private Set<Objednavka> objednavkas = new LinkedHashSet<>();
-
-    public Set<Objednavka> getObjednavkas() {
-        return objednavkas;
+    // Getters and Setters
+    public Integer getIdmisto() {
+        return idmisto;
     }
 
-    public void setObjednavkas(Set<Objednavka> objednavkas) {
-        this.objednavkas = objednavkas;
-    }
-
-    public Integer getQuantitysum() {
-        return quantitysum;
-    }
-
-    public void setQuantitysum(Integer quantitysum) {
-        this.quantitysum = quantitysum;
-    }
-
-    public Integer getAvaiablequantity() {
-        return avaiablequantity;
-    }
-
-    public void setAvaiablequantity(Integer avaiablequantity) {
-        this.avaiablequantity = avaiablequantity;
-    }
-
-    public Typmista getIdtypmista() {
-        return idtypmista;
-    }
-
-    public void setIdtypmista(Typmista idtypmista) {
-        this.idtypmista = idtypmista;
+    public void setIdmisto(Integer idmisto) {
+        this.idmisto = idmisto;
     }
 
     public Integer getAdresa() {
@@ -84,11 +52,27 @@ public class misto {
         this.adresa = adresa;
     }
 
-    public Integer getId() {
-        return id;
+    public Typmista getIdtypmista() {
+        return idtypmista;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setIdtypmista(Typmista idtypmista) {
+        this.idtypmista = idtypmista;
+    }
+
+    public Integer getAvailableQuantity() {
+        return availableQuantity;
+    }
+
+    public void setAvailableQuantity(Integer availableQuantity) {
+        this.availableQuantity = availableQuantity;
+    }
+
+    public Integer getQuantitySum() {
+        return quantitySum;
+    }
+
+    public void setQuantitySum(Integer quantitySum) {
+        this.quantitySum = quantitySum;
     }
 }

@@ -17,23 +17,29 @@ public class Typmista {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "idtypmista", nullable = false)
-    private Integer id;
+    private Integer idtypmista;
 
     @Column(name = "typmista", nullable = false, length = 3)
-    private String typmista;
+    private String typMista;
 
     @Column(name = "cena", nullable = false)
     private Integer cena;
 
-    @OneToMany(mappedBy = "idtypmista")
-    private Set<misto> mistos = new LinkedHashSet<>();
-
-    public Set<misto> getMistos() {
-        return mistos;
+    // Getters and Setters
+    public Integer getIdtypmista() {
+        return idtypmista;
     }
 
-    public void setMistos(Set<misto> mistos) {
-        this.mistos = mistos;
+    public void setIdtypmista(Integer idtypmista) {
+        this.idtypmista = idtypmista;
+    }
+
+    public String getTypMista() {
+        return typMista;
+    }
+
+    public void setTypMista(String typMista) {
+        this.typMista = typMista;
     }
 
     public Integer getCena() {
@@ -43,21 +49,4 @@ public class Typmista {
     public void setCena(Integer cena) {
         this.cena = cena;
     }
-
-    public String getTypmista() {
-        return typmista;
-    }
-
-    public void setTypmista(String typmista) {
-        this.typmista = typmista;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
 }

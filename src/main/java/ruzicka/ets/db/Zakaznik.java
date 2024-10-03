@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -18,64 +19,30 @@ public class Zakaznik {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "idzakaznik", nullable = false)
-    private Integer id;
+    private Integer idzakaznik;
 
-    @Column(name = "jmeno", nullable = false)
+    @Column(name = "jmeno", nullable = false, length = 255)
     private String jmeno;
 
-    @Column(name = "prijmeni", nullable = false)
+    @Column(name = "prijmeni", nullable = false, length = 255)
     private String prijmeni;
 
-    @Column(name = "mail", nullable = false)
+    @Column(name = "mail", nullable = false, length = 255)
     private String mail;
 
-    @OneToMany(mappedBy = "idzakaznik")
-    private Set<Objednavka> objednavkas = new LinkedHashSet<>();
-
-    @Column(name = "status", length = 3)
-    private String status;
+    @Column(name = "status", nullable = false, length = 20)
+    private String status;  // Used for tracking email verification: "PENDING", "VERIFIED", etc.
 
     @Column(name = "caspotvrzeni")
-    private Instant caspotvrzeni;
+    private Timestamp caspotvrzeni;
 
-    public Instant getCaspotvrzeni() {
-        return caspotvrzeni;
+    // Getters and Setters
+    public Integer getIdzakaznik() {
+        return idzakaznik;
     }
 
-    public void setCaspotvrzeni(Instant caspotvrzeni) {
-        this.caspotvrzeni = caspotvrzeni;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Set<Objednavka> getObjednavkas() {
-        return objednavkas;
-    }
-
-    public void setObjednavkas(Set<Objednavka> objednavkas) {
-        this.objednavkas = objednavkas;
-    }
-
-    public String getMail() {
-        return mail;
-    }
-
-    public void setMail(String mail) {
-        this.mail = mail;
-    }
-
-    public String getPrijmeni() {
-        return prijmeni;
-    }
-
-    public void setPrijmeni(String prijmeni) {
-        this.prijmeni = prijmeni;
+    public void setIdzakaznik(Integer idzakaznik) {
+        this.idzakaznik = idzakaznik;
     }
 
     public String getJmeno() {
@@ -86,12 +53,35 @@ public class Zakaznik {
         this.jmeno = jmeno;
     }
 
-    public Integer getId() {
-        return id;
+    public String getPrijmeni() {
+        return prijmeni;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setPrijmeni(String prijmeni) {
+        this.prijmeni = prijmeni;
     }
 
+    public String getMail() {
+        return mail;
+    }
+
+    public void setMail(String mail) {
+        this.mail = mail;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Timestamp getCaspotvrzeni() {
+        return caspotvrzeni;
+    }
+
+    public void setCaspotvrzeni(Timestamp caspotvrzeni) {
+        this.caspotvrzeni = caspotvrzeni;
+    }
 }

@@ -26,12 +26,12 @@ public class OrderController {
     private MistoRepository mistoRepository;
 
     @GetMapping("/misto")
-    public List<EventInfoDTO> getEventInfo(@RequestParam Integer adresa, @RequestParam Integer quantityavaiable) {
-        List<misto> mistoList = mistoRepository.findByAdresaAndAvaiablequantity(adresa, quantityavaiable);
+    public List<EventInfoDTO> getEventInfo(@RequestParam Integer adresa, @RequestParam Integer avaiableQuantity) {
+        List<misto> mistoList = mistoRepository.findByAdresaAndAvailableQuantity(adresa, avaiableQuantity);
         return mistoList.stream().map(misto -> {
             EventInfoDTO response = new EventInfoDTO();
             response.setAdresa(misto.getAdresa());
-            response.setAvaiablequantity(misto.getAvaiablequantity());
+            response.setAvaiablequantity(misto.getAvailableQuantity());
 //            response.setIdzakaznik(objednavka.getIdzakaznik());
             response.setCena(misto.getIdtypmista().getCena());
             return response;
