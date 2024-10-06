@@ -1,6 +1,7 @@
 package ruzicka.ets.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -39,9 +40,11 @@ public class EmailService {
 
     // Email credentials (these should be configured in your application properties)
     private final String HOST = "imap.seznam.cz";
-    private final String EMAIL = ""; // Update with your email
-    private final String PASSWORD = ""; // Update with your password
+    @Value("${email.username}")
+    private String EMAIL;
 
+    @Value("${email.password}")
+    private String PASSWORD;
     // Send the verification email with Zakaznik ID
     public void sendVerificationEmail(Zakaznik zakaznik, String subject, String messageContent) {
         Integer zakaznikId = zakaznik.getIdzakaznik();
