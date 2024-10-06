@@ -12,4 +12,8 @@ import java.util.List;
 
 public interface ObjednavkaRepository extends JpaRepository<Objednavka, Integer> {
     List<Objednavka> findByIdzakaznik_Idzakaznik(Integer idzakaznik);
+
+    List<Objednavka> findByStatusAndId(String variableSymbol, String aNew);
+
+    List<Objednavka> findByZakaznikIdzakaznik(Integer zakaznikId);
 }

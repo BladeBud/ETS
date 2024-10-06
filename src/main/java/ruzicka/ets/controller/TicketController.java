@@ -37,7 +37,7 @@ public class TicketController {
 
         if (existingUser.isPresent()) {
             Zakaznik user = existingUser.get();
-            if ("V".equals(user.getStatus())) { //verified
+            if ("V".equals(user.getStatus())) { // verified
                 List<Objednavka> orders = objednavkaRepository.findByIdzakaznik_Idzakaznik(user.getIdzakaznik());
                 return ResponseEntity.ok(orders);
             } else {
@@ -46,25 +46,24 @@ public class TicketController {
         } else {
             Zakaznik newUser = new Zakaznik();
             newUser.setMail(email);
-            newUser.setStatus("P"); //pending
-            newUser.setCaspotvrzeni(null);
+            newUser.setStatus("P"); // pending
             zakaznikRepository.save(newUser);
-            emailService.sendVerificationEmail(email, "Verify your email", "Click this link to verify.");
+
+            // Send verification email
+            emailService.sendVerificationEmail(newUser, "Verify your email", "Please verify your email address.");
+
             return ResponseEntity.ok("Verification email sent.");
         }
     }
 
     @GetMapping("/verify-email")
-    public ResponseEntity<String> verifyEmail(@RequestParam String email) {
-        Optional<Zakaznik> user = zakaznikRepository.findByMail(email);
-        if (user.isPresent()) {
-            Zakaznik zakaznik = user.get();
-            zakaznik.setStatus("VERIFIED");
-            zakaznik.setCaspotvrzeni(new Timestamp(System.currentTimeMillis()));
-            zakaznikRepository.save(zakaznik);
-            return ResponseEntity.ok("Email verified.");
+    public ResponseEntity<String> verifyEmail(@RequestParam String email, @RequestParam String token) {
+        boolean verified = emailService.verifyEmail(email, token);
+
+        if (verified) {
+            return ResponseEntity.ok("Email verified successfully.");
         } else {
-            return ResponseEntity.status(404).body("User not found.");
+            return ResponseEntity.status(404).body("Email verification failed. Invalid token or email.");
         }
     }
 }
