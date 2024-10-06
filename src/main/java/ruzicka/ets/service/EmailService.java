@@ -42,28 +42,33 @@ public class EmailService {
     private final String EMAIL = ""; // Update with your email
     private final String PASSWORD = ""; // Update with your password
 
-    // Send the verification email
-    public void sendVerificationEmail(String email, String subject, String messageContent) {
+    // Send the verification email with Zakaznik ID
+    public void sendVerificationEmail(Zakaznik zakaznik, String subject, String messageContent) {
+        Integer zakaznikId = zakaznik.getIdzakaznik();
+
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
+        message.setTo(zakaznik.getMail());
         message.setSubject(subject);
         message.setText(messageContent + "\n\n" +
                 "Click this link to verify your email: " +
-                "http://localhost:8080/api/tickets/verify-email?email=" + email);
+                "http://localhost:8080/api/tickets/verify-email?email=" + zakaznik.getMail() + "&id=" + zakaznikId);
 
         emailSender.send(message);
-        System.out.println("Verification email sent to " + email);
+        System.out.println("Verification email sent to " + zakaznik.getMail());
     }
-    // Verify the user's email
-    public boolean verifyEmail(String email) {
+
+    // Verify the user's email using the Zakaznik ID
+    public boolean verifyEmail(String email, Integer id) {
         Optional<Zakaznik> zakaznikOptional = zakaznikRepository.findByMail(email);
         if (zakaznikOptional.isPresent()) {
             Zakaznik zakaznik = zakaznikOptional.get();
-            zakaznik.setStatus("V");  // Set status to verified
-            zakaznik.setCaspotvrzeni(new Timestamp(System.currentTimeMillis())); // Set the confirmation time
-            zakaznikRepository.save(zakaznik);
-            System.out.println("Email " + email + " has been verified.");
-            return true;
+            if (zakaznik.getIdzakaznik().equals(id)) {
+                zakaznik.setStatus("V");  // Set status to verified
+                zakaznik.setCaspotvrzeni(new Timestamp(System.currentTimeMillis())); // Set the confirmation time
+                zakaznikRepository.save(zakaznik);
+                System.out.println("Email " + email + " has been verified.");
+                return true;
+            }
         }
         return false;
     }

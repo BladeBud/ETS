@@ -37,7 +37,7 @@ public class TicketController {
 
         if (existingUser.isPresent()) {
             Zakaznik user = existingUser.get();
-            if ("V".equals(user.getStatus())) { // verified
+            if ("V".equals(user.getStatus())) { // Verified
                 List<Objednavka> orders = objednavkaRepository.findByIdzakaznik_Idzakaznik(user.getIdzakaznik());
                 return ResponseEntity.ok(orders);
             } else {
@@ -46,10 +46,10 @@ public class TicketController {
         } else {
             Zakaznik newUser = new Zakaznik();
             newUser.setMail(email);
-            newUser.setStatus("P"); // pending
+            newUser.setStatus("P"); // Pending verification
             zakaznikRepository.save(newUser);
 
-            // Send verification email
+            // Send verification email with Zakaznik ID
             emailService.sendVerificationEmail(newUser, "Verify your email", "Please verify your email address.");
 
             return ResponseEntity.ok("Verification email sent.");
@@ -57,13 +57,13 @@ public class TicketController {
     }
 
     @GetMapping("/verify-email")
-    public ResponseEntity<String> verifyEmail(@RequestParam String email, @RequestParam String token) {
-        boolean verified = emailService.verifyEmail(email, token);
+    public ResponseEntity<String> verifyEmail(@RequestParam String email, @RequestParam Integer id) {
+        boolean verified = emailService.verifyEmail(email, id);
 
         if (verified) {
             return ResponseEntity.ok("Email verified successfully.");
         } else {
-            return ResponseEntity.status(404).body("Email verification failed. Invalid token or email.");
+            return ResponseEntity.status(404).body("Email verification failed. Invalid ID or email.");
         }
     }
 }
