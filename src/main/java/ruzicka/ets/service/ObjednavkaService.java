@@ -18,7 +18,7 @@ public class ObjednavkaService {
     private ObjednavkaRepository objednavkaRepository;
 
     public List<Objednavka> findOrdersByZakaznikId(Integer zakaznikId) {
-        return objednavkaRepository.findByZakaznikIdzakaznik(zakaznikId);
+        return objednavkaRepository.findByIdzakaznik_Idzakaznik(zakaznikId);
     }
 
     public Objednavka findOrderById(Integer orderId) {

@@ -11,6 +11,7 @@ import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.search.FlagTerm;
 import jakarta.mail.internet.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ruzicka.ets.repository.ObjednavkaRepository;
 /**
@@ -22,8 +23,11 @@ import ruzicka.ets.repository.ObjednavkaRepository;
 
 import org.springframework.mail.javamail.JavaMailSender;
 import ruzicka.ets.db.Objednavka;
+import ruzicka.ets.repository.ZakaznikRepository;
+
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 
@@ -31,15 +35,19 @@ import java.util.Properties;
 @Service
 public class EmailCheckerService {
 
-    private static final String HOST =  "imap.seznam.cz";
-    private static final String USERNAME = "your-email@gmail.com";
-    private static final String PASSWORD = "your-app-password";
+    private static final String HOST = "imap.seznam.cz";
+
+    @Value("${email.username}")
+    private String username;
+
+    @Value("${email.password}")
+    private String password;
 
     @Autowired
     private ObjednavkaRepository objednavkaRepository;
 
     @Autowired
-    private JavaMailSender mailSender;
+    private ZakaznikRepository zakaznikRepository;
 
     // This method is called to start the email checking service
     public void startEmailCheckingService() {
@@ -65,7 +73,7 @@ public class EmailCheckerService {
         Session session = Session.getDefaultInstance(properties, null);
 
         Store store = session.getStore("imaps");
-        store.connect(HOST, USERNAME, PASSWORD);
+        store.connect(HOST, username, password);
 
         Folder inbox = store.getFolder("inbox");
         inbox.open(Folder.READ_WRITE);
@@ -76,12 +84,13 @@ public class EmailCheckerService {
         for (Message message : messages) {
             if (isBankEmail(message)) {
                 String content = getTextFromMessage(message);
+
                 // Extract variable symbol and amount from email content
                 String variableSymbol = extractVariableSymbol(content);
                 int amount = extractAmount(content);
 
                 // Validate payment and update order status
-                if (validateAndProcessPayment(variableSymbol, amount)) {
+                if (variableSymbol != null && amount > 0 && validateAndProcessPayment(variableSymbol, amount)) {
                     System.out.println("Payment verified for order with symbol: " + variableSymbol);
                 }
             }
@@ -98,10 +107,11 @@ public class EmailCheckerService {
 
     // Extract variable symbol from email content
     private String extractVariableSymbol(String content) {
-        // Logic to extract variable symbol from email
+        // More robust parsing logic (example):
         int index = content.indexOf("Variable Symbol:");
         if (index != -1) {
-            return content.substring(index + 16, index + 21).trim();
+            String symbol = content.substring(index + 16).split("\\s+")[0]; // Extract the symbol
+            return symbol.trim();
         }
         return null;
     }
@@ -110,7 +120,12 @@ public class EmailCheckerService {
     private int extractAmount(String content) {
         int index = content.indexOf("Amount:");
         if (index != -1) {
-            return Integer.parseInt(content.substring(index + 7, content.indexOf(" ", index + 7)).trim());
+            String amountStr = content.substring(index + 7).split("\\s+")[0]; // Extract the amount
+            try {
+                return Integer.parseInt(amountStr.trim());
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
         }
         return 0;
     }
@@ -118,25 +133,26 @@ public class EmailCheckerService {
     // Validate payment and update order status
     private boolean validateAndProcessPayment(String variableSymbol, int amount) {
         try {
-            // Retrieve the order from the database using the variable symbol (order ID)
-            List<Objednavka> orders = objednavkaRepository.findByStatusAndId(variableSymbol, "NEW");
+            // Retrieve the order using the variable symbol
+            Optional<Objednavka> orderOpt = objednavkaRepository.findById(Integer.parseInt(variableSymbol));
 
-            if (orders.isEmpty()) {
-                System.out.println("No matching order found for symbol: " + variableSymbol);
-                return false;
-            }
+            if (orderOpt.isPresent()) {
+                Objednavka order = orderOpt.get();
 
-            // Match the amount and update order status
-            for (Objednavka order : orders) {
+                // Match the amount and update order status
                 if (order.getCena().equals(amount)) {
                     order.setStatus("PAID");
                     objednavkaRepository.save(order);
 
-                    // Trigger ticket sending process
+                    // Trigger ticket sending process (you can enhance this method as needed)
                     sendTicketEmail(order);
 
                     return true;
+                } else {
+                    System.out.println("Amount mismatch for order: " + variableSymbol);
                 }
+            } else {
+                System.out.println("No matching order found for symbol: " + variableSymbol);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -168,9 +184,9 @@ public class EmailCheckerService {
         return result.toString();
     }
 
-    // Send confirmation email with the ticket (dummy implementation)
+    // Dummy email sending logic, replace this with actual email sending code
     private void sendTicketEmail(Objednavka order) {
         System.out.println("Sending tickets to the user for order ID: " + order.getId());
-        // Implement your ticket email sending logic here using mailSender
+        // Implement ticket email sending logic using JavaMailSender if needed
     }
 }

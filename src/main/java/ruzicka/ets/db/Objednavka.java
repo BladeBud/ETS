@@ -21,11 +21,11 @@ public class Objednavka {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "idmisto", nullable = false)
+    @JoinColumn(name = "idmisto",referencedColumnName = "idmisto", nullable = false)
     private misto idmisto;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "idzakaznik", nullable = false)
+    @JoinColumn(name = "idzakaznik",referencedColumnName = "idzakaznik", nullable = false)
     private Zakaznik idzakaznik;
 
     @Column(name = "cena", nullable = false)
