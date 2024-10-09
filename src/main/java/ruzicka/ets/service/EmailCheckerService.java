@@ -1,5 +1,6 @@
 package ruzicka.ets.service;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.mail.BodyPart;
 import jakarta.mail.Flags;
 import jakarta.mail.Folder;
@@ -31,7 +32,6 @@ import java.util.Optional;
 import java.util.Properties;
 
 
-
 @Service
 public class EmailCheckerService {
 
@@ -49,12 +49,15 @@ public class EmailCheckerService {
     @Autowired
     private ZakaznikRepository zakaznikRepository;
 
-    // This method is called to start the email checking service
+    @PostConstruct
+    public void init() {
+        startEmailCheckingService();
+    }
+
     public void startEmailCheckingService() {
         new Thread(this::checkEmailLoop).start();
     }
 
-    // Method to loop and check for emails
     private void checkEmailLoop() {
         while (true) {
             try {
@@ -66,7 +69,6 @@ public class EmailCheckerService {
         }
     }
 
-    // Connect to the email server and check for new emails
     private void checkForNewEmails() throws MessagingException, IOException {
         Properties properties = new Properties();
         properties.put("mail.store.protocol", "imaps");
@@ -78,20 +80,31 @@ public class EmailCheckerService {
         Folder inbox = store.getFolder("inbox");
         inbox.open(Folder.READ_WRITE);
 
-        // Fetch unread messages
-        Message[] messages = inbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
+        boolean bankEmailFound = false;
 
-        for (Message message : messages) {
-            if (isBankEmail(message)) {
-                String content = getTextFromMessage(message);
+        while (!bankEmailFound) {
+            Message[] messages = inbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
 
-                // Extract variable symbol and amount from email content
-                String variableSymbol = extractVariableSymbol(content);
-                int amount = extractAmount(content);
+            for (Message message : messages) {
+                if (isBankEmail(message)) {
+                    bankEmailFound = true;
+                    String content = getTextFromMessage(message);
 
-                // Validate payment and update order status
-                if (variableSymbol != null && amount > 0 && validateAndProcessPayment(variableSymbol, amount)) {
-                    System.out.println("Payment verified for order with symbol: " + variableSymbol);
+                    String variableSymbol = extractVariableSymbol(content);
+                    int amount = extractAmount(content);
+
+                    if (variableSymbol != null && amount > 0 && validateAndProcessPayment(variableSymbol, amount)) {
+                        System.out.println("Payment verified for order with symbol: " + variableSymbol);
+                    }
+                }
+            }
+
+            if (!bankEmailFound) {
+                System.out.println("No bank email found. Sleeping for 60 seconds.");
+                try {
+                    Thread.sleep(60000); // Wait for 60 seconds before checking again
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -100,27 +113,23 @@ public class EmailCheckerService {
         store.close();
     }
 
-    // Check if the email is from the bank
     private boolean isBankEmail(Message message) throws MessagingException {
-        return message.getFrom()[0].toString().contains("bank@example.com"); // Change to your bank's email
+        return message.getFrom()[0].toString().contains("adam.ruzicka@email.cz"); //TODO: Change to bank's email
     }
 
-    // Extract variable symbol from email content
     private String extractVariableSymbol(String content) {
-        // More robust parsing logic (example):
         int index = content.indexOf("Variable Symbol:");
         if (index != -1) {
-            String symbol = content.substring(index + 16).split("\\s+")[0]; // Extract the symbol
+            String symbol = content.substring(index + 16).split("\\s+")[0];
             return symbol.trim();
         }
         return null;
     }
 
-    // Extract amount from email content
     private int extractAmount(String content) {
         int index = content.indexOf("Amount:");
         if (index != -1) {
-            String amountStr = content.substring(index + 7).split("\\s+")[0]; // Extract the amount
+            String amountStr = content.substring(index + 7).split("\\s+")[0];
             try {
                 return Integer.parseInt(amountStr.trim());
             } catch (NumberFormatException e) {
@@ -130,21 +139,17 @@ public class EmailCheckerService {
         return 0;
     }
 
-    // Validate payment and update order status
     private boolean validateAndProcessPayment(String variableSymbol, int amount) {
         try {
-            // Retrieve the order using the variable symbol
             Optional<Objednavka> orderOpt = objednavkaRepository.findById(Integer.parseInt(variableSymbol));
 
             if (orderOpt.isPresent()) {
                 Objednavka order = orderOpt.get();
 
-                // Match the amount and update order status
                 if (order.getCena().equals(amount)) {
                     order.setStatus("PAID");
                     objednavkaRepository.save(order);
 
-                    // Trigger ticket sending process (you can enhance this method as needed)
                     sendTicketEmail(order);
 
                     return true;
@@ -160,7 +165,6 @@ public class EmailCheckerService {
         return false;
     }
 
-    // Extract text content from the email
     private String getTextFromMessage(Message message) throws MessagingException, IOException {
         String result = "";
         if (message.isMimeType("text/plain")) {
@@ -184,9 +188,7 @@ public class EmailCheckerService {
         return result.toString();
     }
 
-    // Dummy email sending logic, replace this with actual email sending code
     private void sendTicketEmail(Objednavka order) {
         System.out.println("Sending tickets to the user for order ID: " + order.getId());
-        // Implement ticket email sending logic using JavaMailSender if needed
     }
 }

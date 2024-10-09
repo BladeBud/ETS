@@ -91,19 +91,18 @@ public class EmailService {
             // Open the inbox folder
             Folder inbox = store.getFolder("INBOX");
             inbox.open(Folder.READ_ONLY);
-
-            // Fetch the messages from inbox
             Message[] messages = inbox.getMessages();
-
-            // Process each message
             for (Message message : messages) {
-                if (message instanceof MimeMessage) {
-                    MimeMessage mimeMessage = (MimeMessage) message;
-                    processBankEmail(mimeMessage);
+                try {
+                    if (message instanceof MimeMessage) {
+                        MimeMessage mimeMessage = (MimeMessage) message;
+                        processBankEmail(mimeMessage);
+                    }
+                } catch (MessagingException | IOException e) {
+                    e.printStackTrace();
+                    // Log the error and continue processing other messages
                 }
             }
-
-            // Close the inbox and store connections
             inbox.close(false);
             store.close();
         } catch (Exception e) {

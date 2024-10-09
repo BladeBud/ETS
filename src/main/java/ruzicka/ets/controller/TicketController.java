@@ -9,7 +9,6 @@ import ruzicka.ets.repository.ZakaznikRepository;
 import ruzicka.ets.repository.ObjednavkaRepository;
 import ruzicka.ets.service.EmailService;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
