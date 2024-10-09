@@ -38,14 +38,13 @@ public class EmailService {
     @Autowired
     private ObjednavkaRepository objednavkaRepository;
 
-    // Email credentials (these should be configured in your application properties)
     private final String HOST = "imap.seznam.cz";
     @Value("${email.username}")
     private String EMAIL;
 
     @Value("${email.password}")
     private String PASSWORD;
-    // Send the verification email with Zakaznik ID
+
     public void sendVerificationEmail(Zakaznik zakaznik, String subject, String messageContent) {
         Integer zakaznikId = zakaznik.getIdzakaznik();
 
@@ -60,14 +59,13 @@ public class EmailService {
         System.out.println("Verification email sent to " + zakaznik.getMail());
     }
 
-    // Verify the user's email using the Zakaznik ID
     public boolean verifyEmail(String email, Integer id) {
         Optional<Zakaznik> zakaznikOptional = zakaznikRepository.findByMail(email);
         if (zakaznikOptional.isPresent()) {
             Zakaznik zakaznik = zakaznikOptional.get();
             if (zakaznik.getIdzakaznik().equals(id)) {
-                zakaznik.setStatus("V");  // Set status to verified
-                zakaznik.setCaspotvrzeni(new Timestamp(System.currentTimeMillis())); // Set the confirmation time
+                zakaznik.setStatus("V");
+                zakaznik.setCaspotvrzeni(new Timestamp(System.currentTimeMillis()));
                 zakaznikRepository.save(zakaznik);
                 System.out.println("Email " + email + " has been verified.");
                 return true;
@@ -76,33 +74,47 @@ public class EmailService {
         return false;
     }
 
-    // Scheduled task to check for emails from the bank every minute
-    @Scheduled(fixedRate = 60000) // 1 minute
+    @Scheduled(fixedRate = 60000)
     public void checkEmails() {
         Properties properties = new Properties();
         properties.put("mail.store.protocol", "imaps");
 
         try {
-            // Connect to the email store (IMAP)
             Session session = Session.getInstance(properties);
             Store store = session.getStore("imaps");
             store.connect(HOST, EMAIL, PASSWORD);
 
-            // Open the inbox folder
             Folder inbox = store.getFolder("INBOX");
             inbox.open(Folder.READ_ONLY);
-            Message[] messages = inbox.getMessages();
-            for (Message message : messages) {
-                try {
-                    if (message instanceof MimeMessage) {
-                        MimeMessage mimeMessage = (MimeMessage) message;
-                        processBankEmail(mimeMessage);
+
+            boolean bankEmailFound = false;
+
+            while (!bankEmailFound) {
+                Message[] messages = inbox.getMessages();
+                for (Message message : messages) {
+                    try {
+                        if (message instanceof MimeMessage) {
+                            MimeMessage mimeMessage = (MimeMessage) message;
+                            if (isBankEmail(mimeMessage)) {
+                                bankEmailFound = true;
+                                processBankEmail(mimeMessage);
+                            }
+                        }
+                    } catch (MessagingException | IOException e) {
+                        e.printStackTrace();
                     }
-                } catch (MessagingException | IOException e) {
-                    e.printStackTrace();
-                    // Log the error and continue processing other messages
+                }
+
+                if (!bankEmailFound) {
+                    System.out.println("No bank email found in this iteration.");
+                    try {
+                        Thread.sleep(60000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
+
             inbox.close(false);
             store.close();
         } catch (Exception e) {
@@ -110,46 +122,39 @@ public class EmailService {
         }
     }
 
-    // Process the bank emails to check if payment has been received
+    private boolean isBankEmail(MimeMessage message) throws MessagingException {
+        return message.getFrom()[0].toString().contains("mbankl@example.com"); //TODO: Change to bank's email
+    }
+
     private void processBankEmail(MimeMessage message) throws MessagingException, IOException {
         String subject = message.getSubject();
         String content = message.getContent().toString();
 
-        // Assuming the subject contains the order ID (variable symbol) and the email content contains the payment amount
         if (subject.contains("Payment Confirmation")) {
             String[] parts = subject.split(": ");
-            String variableSymbol = parts[1].trim(); // Assuming the order ID is the variable symbol
+            String variableSymbol = parts[1].trim();
 
-            // Parse the email content to get the payment amount
             String paymentAmountStr = parsePaymentAmount(content);
             int paymentAmount = Integer.parseInt(paymentAmountStr);
 
-            // Validate the order and payment
             validateOrder(variableSymbol, paymentAmount);
         }
     }
 
-    // Parse the email content to extract payment amount (example)
     private String parsePaymentAmount(String content) {
-        // Example: "Thank you for your payment of 1000 CZK for order..."
         int amountStart = content.indexOf("payment of ") + 11;
         int amountEnd = content.indexOf(" CZK", amountStart);
         return content.substring(amountStart, amountEnd);
     }
 
-    // Validate the order based on the variable symbol (order ID) and payment amount
     private void validateOrder(String variableSymbol, int paymentAmount) {
-        // Find the order by variable symbol (ID of order)
         Optional<Objednavka> orderOpt = objednavkaRepository.findById(Integer.parseInt(variableSymbol));
 
         if (orderOpt.isPresent()) {
             Objednavka order = orderOpt.get();
             if (order.getCena() == paymentAmount) {
-                // Mark the order as PAID and save it
                 order.setStatus("PAID");
                 objednavkaRepository.save(order);
-
-                // Optionally, send tickets via email
                 System.out.println("Order " + variableSymbol + " confirmed and tickets sent.");
             } else {
                 System.out.println("Payment amount mismatch for order ID " + variableSymbol);
