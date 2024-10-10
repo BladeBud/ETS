@@ -202,9 +202,9 @@ public class EmailCheckerService {
             if (zakaznikOpt.isPresent()) {
                 Zakaznik zakaznik = zakaznikOpt.get();
                 String userEmail = zakaznik.getMail();
-                String subject = "Lístkz pro objednávku: " + order.getId();
+                String subject = "Lístky pro objednávku: " + order.getId();
                 String bodyText = "Dobrý den " + zakaznik.getJmeno() + ",\n\n"
-                        + "Děkujeme za zakoupení lístku. Lístky můžete najít v příloze.\n\n"
+                        + "Děkujeme za zakoupení lístků. Lístky můžete najít v příloze.\n\n"
                         + "Naviděnou,\n"
                         + "Vaše Oktávy";
 
@@ -214,7 +214,7 @@ public class EmailCheckerService {
                 // Use MimeMessageHelper to attach files
                 MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-                helper.setFrom(username);  // Use the email from configuration as the sender
+                helper.setFrom(username);
                 helper.setTo(userEmail);      // Recipient email
                 helper.setSubject(subject);
                 helper.setText(bodyText);
