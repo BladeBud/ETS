@@ -13,7 +13,10 @@ import jakarta.mail.search.FlagTerm;
 import jakarta.mail.internet.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import ruzicka.ets.db.Zakaznik;
 import ruzicka.ets.repository.ObjednavkaRepository;
 /**
 
@@ -26,6 +29,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import ruzicka.ets.db.Objednavka;
 import ruzicka.ets.repository.ZakaznikRepository;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -48,6 +52,9 @@ public class EmailCheckerService {
 
     @Autowired
     private ZakaznikRepository zakaznikRepository;
+
+    @Autowired
+    private JavaMailSender emailSender;
 
     @PostConstruct
     public void init() {
@@ -102,7 +109,7 @@ public class EmailCheckerService {
             if (!bankEmailFound) {
                 System.out.println("No bank email found. Sleeping for 60 seconds.");
                 try {
-                    Thread.sleep(60000); // Wait for 60 seconds before checking again
+                    Thread.sleep(60000); //TODO: taky zmenit
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -189,6 +196,54 @@ public class EmailCheckerService {
     }
 
     private void sendTicketEmail(Objednavka order) {
-        System.out.println("Sending tickets to the user for order ID: " + order.getId());
+        try {
+            Optional<Zakaznik> zakaznikOpt = zakaznikRepository.findById(order.getIdzakaznik());
+
+            if (zakaznikOpt.isPresent()) {
+                Zakaznik zakaznik = zakaznikOpt.get();
+                String userEmail = zakaznik.getMail();
+                String subject = "Your Tickets for Order ID: " + order.getId();
+                String bodyText = "Dear " + zakaznik.getJmeno() + ",\n\n"
+                        + "Thank you for your payment. Please find your tickets attached for order ID: " + order.getId() + ".\n\n"
+                        + "Best regards,\n"
+                        + "Your Event Team";
+
+                // Create a MimeMessage
+                MimeMessage message = emailSender.createMimeMessage();
+
+                // Use MimeMessageHelper to attach files
+                MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+                helper.setFrom(username);  // Use the email from configuration as the sender
+                helper.setTo(userEmail);      // Recipient email
+                helper.setSubject(subject);
+                helper.setText(bodyText);
+
+                // Add ticket as an attachment (assuming tickets are generated as PDFs)
+                File ticketFile = generateTicketFile(order);  // Replace with actual ticket generation logic
+                FileSystemResource file = new FileSystemResource(ticketFile);
+                helper.addAttachment("Ticket_" + order.getId() + ".pdf", file);
+
+                // Send the email
+                emailSender.send(message);
+                System.out.println("Tickets sent to " + userEmail + " for order ID: " + order.getId());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed to send ticket email for order ID: " + order.getId());
+        }
     }
+
+    /**
+     * Generates a ticket file for the given order.
+     * This is a placeholder method - replace with your actual ticket generation logic.
+     */
+    private File generateTicketFile(Objednavka order) throws IOException {
+        // TODO: Implement ticket generation logic (e.g., create PDF, image, etc.)
+        // For demonstration purposes, returning a sample file
+        File tempFile = File.createTempFile("Ticket_" + order.getId(), ".pdf");
+        // Write ticket content to tempFile
+        return tempFile;
+    }
+
 }
