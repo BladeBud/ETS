@@ -147,7 +147,7 @@ public class EmailCheckerService {
                 Objednavka order = orderOpt.get();
 
                 if (order.getCena().equals(amount)) {
-                    order.setStatus("PAID");
+                    order.setStatus("P");
                     objednavkaRepository.save(order);
 
                     sendTicketEmail(order);

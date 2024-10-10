@@ -52,8 +52,8 @@ public class EmailService {
         message.setTo(zakaznik.getMail());
         message.setSubject(subject);
         message.setText(messageContent + "\n\n" +
-                "Click this link to verify your email: " +
-                "http://localhost:8080/api/tickets/verify-email?email=" + zakaznik.getMail() + "&id=" + zakaznikId);
+                "Prosím klikněte na tento odkaz pro potvrzení mailu: " + //TODO: změnit znění mailu
+                "http://localhost:8080/api/tickets/verify-email?email=" + zakaznik.getMail() + "&id=" + zakaznikId); //TODO: Change to production URL
 
         emailSender.send(message);
         System.out.println("Verification email sent to " + zakaznik.getMail());
@@ -74,7 +74,7 @@ public class EmailService {
         return false;
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 60000)//TODO: domluvit se na to kolik casu to ma byt momentalne 1min
     public void checkEmails() {
         Properties properties = new Properties();
         properties.put("mail.store.protocol", "imaps");
@@ -123,7 +123,7 @@ public class EmailService {
     }
 
     private boolean isBankEmail(MimeMessage message) throws MessagingException {
-        return message.getFrom()[0].toString().contains("mbankl@example.com"); //TODO: Change to bank's email
+        return message.getFrom()[0].toString().contains("adam.ruzicka@email.cz"); //TODO: Change to bank's email
     }
 
     private void processBankEmail(MimeMessage message) throws MessagingException, IOException {
@@ -153,7 +153,7 @@ public class EmailService {
         if (orderOpt.isPresent()) {
             Objednavka order = orderOpt.get();
             if (order.getCena() == paymentAmount) {
-                order.setStatus("PAID");
+                order.setStatus("P");
                 objednavkaRepository.save(order);
                 System.out.println("Order " + variableSymbol + " confirmed and tickets sent.");
             } else {

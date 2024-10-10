@@ -1,89 +1,111 @@
+//// src/test/java/ruzicka/ets/service/EmailCheckerServiceTest.java
 //package ruzicka.ets;
 //
-//import jakarta.mail.MessagingException;
+//import jakarta.mail.*;
+//import jakarta.mail.internet.InternetAddress;
+//import jakarta.mail.search.FlagTerm;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.Mockito;
+//import org.junit.jupiter.api.extension.ExtendWith;
+//import org.mockito.*;
+//import org.mockito.junit.jupiter.MockitoExtension;
+//import org.springframework.beans.factory.annotation.Value;
+//import org.springframework.test.util.ReflectionTestUtils;
 //import ruzicka.ets.db.Objednavka;
 //import ruzicka.ets.repository.ObjednavkaRepository;
+//import ruzicka.ets.repository.ZakaznikRepository;
 //import ruzicka.ets.service.EmailCheckerService;
 //
-//import java.util.ArrayList;
-//import java.util.List;
+//import java.io.IOException;
+//import java.util.Optional;
+//import java.util.Properties;
 //
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.junit.jupiter.api.Assertions.assertFalse;
-//import static org.junit.jupiter.api.Assertions.assertTrue;
-//import static org.mockito.Mockito.when;
+//import static org.junit.jupiter.api.Assertions.*;
+//import static org.mockito.Mockito.*;
 //
-///**
-// * @author czech
-// * @since 2024-10-06
-// */
-//class EmailCheckerServiceTest {
-//
-//    @Mock
-//    private ObjednavkaRepository objednavkaRepository;
+//@ExtendWith(MockitoExtension.class)
+//public class EmailCheckerServiceTest {
 //
 //    @InjectMocks
 //    private EmailCheckerService emailCheckerService;
 //
+//    @Mock
+//    private ObjednavkaRepository objednavkaRepository;
+//
+//    @Mock
+//    private ZakaznikRepository zakaznikRepository;
+//
+//    @Mock
+//    private Session session;
+//
+//    @Mock
+//    private Store store;
+//
+//    @Mock
+//    private Folder inbox;
+//
+//    @Mock
+//    private Message message;
+//
+//    @Value("${email.username}")
+//    private String username;
+//
+//    @Value("${email.password}")
+//    private String password;
+//
 //    @BeforeEach
-//    void setUp() {
-//        // Mock your IMAP connection setup if necessary here
+//    public void setUp() throws Exception {
+//        ReflectionTestUtils.setField(emailCheckerService, "username", "testuser");
+//        ReflectionTestUtils.setField(emailCheckerService, "password", "testpass");
+//
+//        when(session.getStore("imaps")).thenReturn(store);
+//        when(store.getFolder("inbox")).thenReturn(inbox);
 //    }
 //
 //    @Test
-//    void testProcessValidPaymentEmail() throws MessagingException {
-//        // Mock email content
-//        String emailContent = "Payment Confirmation\nVariable Symbol: 12345\nAmount: 1000 CZK";
-//
-//        // Create a mock order that should match the email content
-//        Objednavka mockOrder = new Objednavka();
-//        mockOrder.setId(12345);
-//        mockOrder.setCena(1000);
-//
-//        // Mock repository call to find the order by symbol and amount
-//        when(objednavkaRepository.findByStatusAndId("12345", 1)).thenReturn(List.of(mockOrder));
-//
-//        // Call the method
-//        boolean result = emailCheckerService.validateAndProcessPayment("12345", 1000);
-//
-//        // Assert the result
-//        assertTrue(result);
-//
-//        // Verify that the order was updated and saved
-//        Mockito.verify(objednavkaRepository).save(mockOrder);
+//    public void testStartEmailCheckingService() {
+//        emailCheckerService.startEmailCheckingService();
+//        // Verify that a new thread is started
+//        verify(emailCheckerService, times(1)).startEmailCheckingService();
 //    }
 //
 //    @Test
-//    void testProcessInvalidPaymentEmail() throws MessagingException {
-//        // Mock email content
-//        String emailContent = "Payment Confirmation\nVariable Symbol: 12345\nAmount: 1000 CZK";
+//    public void testCheckForNewEmails() throws MessagingException, IOException {
+//        when(inbox.search(any(FlagTerm.class))).thenReturn(new Message[]{message});
+//        when(message.getFrom()).thenReturn(new Address[]{new InternetAddress("adam.ruzicka@email.cz")});
+//        when(message.getContent()).thenReturn("Variable Symbol: 12345\nAmount: 100");
 //
-//        // No matching order in the repository
-//        when(objednavkaRepository.findByStatusAndId("12345", 1)).thenReturn(new ArrayList<>());
+//        emailCheckerService.checkForNewEmails();
 //
-//        // Call the method
-//        boolean result = emailCheckerService.validateAndProcessPayment("12345", 1000);
-//
-//        // Assert the result
-//        assertFalse(result);
+//        verify(inbox, times(1)).open(Folder.READ_WRITE);
+//        verify(inbox, times(1)).close(false);
+//        verify(store, times(1)).close();
 //    }
 //
 //    @Test
-//    void testExtractVariableSymbol() {
-//        String emailContent = "Payment Confirmation\nVariable Symbol: 12345\nAmount: 1000 CZK";
-//        String variableSymbol = emailCheckerService.extractVariableSymbol(emailContent);
+//    public void testExtractVariableSymbol() {
+//        String content = "Variable Symbol: 12345\nAmount: 100";
+//        String variableSymbol = emailCheckerService.extractVariableSymbol(content);
 //        assertEquals("12345", variableSymbol);
 //    }
 //
 //    @Test
-//    void testExtractAmount() {
-//        String emailContent = "Payment Confirmation\nVariable Symbol: 12345\nAmount: 1000 CZK";
-//        int amount = emailCheckerService.extractAmount(emailContent);
-//        assertEquals(1000, amount);
+//    public void testExtractAmount() {
+//        String content = "Variable Symbol: 12345\nAmount: 100";
+//        int amount = emailCheckerService.extractAmount(content);
+//        assertEquals(100, amount);
+//    }
+//
+//    @Test
+//    public void testValidateAndProcessPayment() {
+//        Objednavka order = new Objednavka();
+//        order.setId(12345);
+//        order.setCena(100);
+//
+//        when(objednavkaRepository.findById(12345)).thenReturn(Optional.of(order));
+//
+//        boolean result = emailCheckerService.validateAndProcessPayment("12345", 100);
+//        assertTrue(result);
+//        verify(objednavkaRepository, times(1)).save(order);
 //    }
 //}
