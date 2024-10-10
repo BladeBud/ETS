@@ -197,16 +197,16 @@ public class EmailCheckerService {
 
     private void sendTicketEmail(Objednavka order) {
         try {
-            Optional<Zakaznik> zakaznikOpt = zakaznikRepository.findById(order.getIdzakaznik());
+            Optional<Zakaznik> zakaznikOpt = zakaznikRepository.findById(order.getIdzakaznik().getIdzakaznik());
 
             if (zakaznikOpt.isPresent()) {
                 Zakaznik zakaznik = zakaznikOpt.get();
                 String userEmail = zakaznik.getMail();
-                String subject = "Your Tickets for Order ID: " + order.getId();
-                String bodyText = "Dear " + zakaznik.getJmeno() + ",\n\n"
-                        + "Thank you for your payment. Please find your tickets attached for order ID: " + order.getId() + ".\n\n"
-                        + "Best regards,\n"
-                        + "Your Event Team";
+                String subject = "Lístkz pro objednávku: " + order.getId();
+                String bodyText = "Dobrý den " + zakaznik.getJmeno() + ",\n\n"
+                        + "Děkujeme za zakoupení lístku. Lístky můžete najít v příloze.\n\n"
+                        + "Naviděnou,\n"
+                        + "Vaše Oktávy";
 
                 // Create a MimeMessage
                 MimeMessage message = emailSender.createMimeMessage();
@@ -220,7 +220,7 @@ public class EmailCheckerService {
                 helper.setText(bodyText);
 
                 // Add ticket as an attachment (assuming tickets are generated as PDFs)
-                File ticketFile = generateTicketFile(order);  // Replace with actual ticket generation logic
+                File ticketFile = generateTicketFile(order);  //TODO: Implement ticket generation logic
                 FileSystemResource file = new FileSystemResource(ticketFile);
                 helper.addAttachment("Ticket_" + order.getId() + ".pdf", file);
 
@@ -236,11 +236,9 @@ public class EmailCheckerService {
 
     /**
      * Generates a ticket file for the given order.
-     * This is a placeholder method - replace with your actual ticket generation logic.
      */
     private File generateTicketFile(Objednavka order) throws IOException {
         // TODO: Implement ticket generation logic (e.g., create PDF, image, etc.)
-        // For demonstration purposes, returning a sample file
         File tempFile = File.createTempFile("Ticket_" + order.getId(), ".pdf");
         // Write ticket content to tempFile
         return tempFile;
