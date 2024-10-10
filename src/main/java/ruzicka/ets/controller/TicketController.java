@@ -7,7 +7,7 @@ import ruzicka.ets.db.Zakaznik;
 import ruzicka.ets.db.Objednavka;
 import ruzicka.ets.repository.ZakaznikRepository;
 import ruzicka.ets.repository.ObjednavkaRepository;
-import ruzicka.ets.service.EmailService;
+import ruzicka.ets.service.EmailVerificationService;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +28,7 @@ public class TicketController {
     private ObjednavkaRepository objednavkaRepository;
 
     @Autowired
-    private EmailService emailService;
+    private EmailVerificationService emailService;
 
     @PostMapping("/login-register")
     public ResponseEntity<?> loginOrRegister(@RequestBody String email) {

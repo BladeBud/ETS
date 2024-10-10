@@ -62,7 +62,7 @@ public class EmailCheckerService {
         while (true) {
             try {
                 checkForNewEmails();
-                Thread.sleep(60000); // Check every 60 seconds
+                Thread.sleep(60000); //TODO: domluvit se na to kolik casu to ma byt momentalne 1min
             } catch (Exception e) {
                 e.printStackTrace();
             }

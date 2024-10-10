@@ -4,39 +4,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import ruzicka.ets.db.Objednavka;
 import ruzicka.ets.db.Zakaznik;
-import ruzicka.ets.repository.ObjednavkaRepository;
 import ruzicka.ets.repository.ZakaznikRepository;
 
-import jakarta.mail.Folder;
-import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
-import jakarta.mail.Session;
-import jakarta.mail.Store;
-import jakarta.mail.internet.MimeMessage;
-
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Optional;
-import java.util.Properties;
 
 /**
- * Service to handle sending verification emails and checking for payment confirmation emails from the bank.
+ * Service to handle sending verification emails.
  */
-@Service
-public class EmailService {
 
+@Service
+public class EmailVerificationService {
+  //--------------------------------------------------------------------------------------------------------------------
     @Autowired
     private JavaMailSender emailSender;
 
     @Autowired
     private ZakaznikRepository zakaznikRepository;
-
-    @Autowired
-    private ObjednavkaRepository objednavkaRepository;
 
     private final String HOST = "imap.seznam.cz";
     @Value("${email.username}")
@@ -44,6 +30,7 @@ public class EmailService {
 
     @Value("${email.password}")
     private String PASSWORD;
+  //--------------------------------------------------------------------------------------------------------------------
 
     public void sendVerificationEmail(Zakaznik zakaznik, String subject, String messageContent) {
         Integer zakaznikId = zakaznik.getIdzakaznik();
@@ -74,7 +61,7 @@ public class EmailService {
         return false;
     }
 
-    @Scheduled(fixedRate = 60000)//TODO: domluvit se na to kolik casu to ma byt momentalne 1min
+  /*  @Scheduled(fixedRate = 60000)
     public void checkEmails() {
         Properties properties = new Properties();
         properties.put("mail.store.protocol", "imaps");
@@ -162,5 +149,5 @@ public class EmailService {
         } else {
             System.out.println("Order not found for ID " + variableSymbol);
         }
-    }
+    }*/
 }
