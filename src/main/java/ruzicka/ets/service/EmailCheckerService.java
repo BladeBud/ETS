@@ -18,24 +18,20 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import ruzicka.ets.db.Zakaznik;
 import ruzicka.ets.repository.ObjednavkaRepository;
-/**
-
- * @author czech
- * @since 2023-10-03
- */
-
-
 import org.springframework.mail.javamail.JavaMailSender;
 import ruzicka.ets.db.Objednavka;
 import ruzicka.ets.repository.ZakaznikRepository;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
+/**
 
+ * @author czech
+ * @since 2023-10-03
+ */
 @Service
 public class EmailCheckerService {
 
