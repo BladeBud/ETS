@@ -44,14 +44,23 @@ public class ObjednavkaService {
 
     public void releaseExpiredReservations() {
         Instant tenMinutesAgo = Instant.now().minus(10, ChronoUnit.MINUTES);
-        List<Objednavka> expiredReservations = objednavkaRepository.findByDatumcasBeforeAndStatus(tenMinutesAgo, "RES");
+        List<Objednavka> expiredReservations = objednavkaRepository.findByDatumcasBeforeAndStatus(tenMinutesAgo, "R");
         for (Objednavka objednavka : expiredReservations) {
             objednavka.setStatus("E"); // E for Expired
             objednavkaRepository.save(objednavka);
         }
     }
 
+    public boolean isAddressReserved(Integer adresa) {
+        List<Objednavka> reservedOrders = objednavkaRepository.findByAdresaAndStatus(adresa, "R");
+        return !reservedOrders.isEmpty();
+    }
+
     public boolean createOrder(OrderRequestDTO orderRequest) {
+        // Check if the address is already reserved
+        if (isAddressReserved(orderRequest.getAdresa())) {
+            return false;
+        }
         // Check if the quantity is available
         List<misto> availableMisto = mistoRepository.findByAdresaAndAvailableQuantity(orderRequest.getAdresa(), orderRequest.getQuantity());
         if (availableMisto.isEmpty()) {

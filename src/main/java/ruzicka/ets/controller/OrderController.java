@@ -62,9 +62,9 @@ public class OrderController {
     public ResponseEntity<String> createOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
         boolean isCreated = objednavkaService.createOrder(orderRequestDTO);
         if (isCreated) {
-            return ResponseEntity.ok("Order created successfully");
+            return ResponseEntity.ok("Objednávka proběhla úspěšně");
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient quantity available");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Místo je už zabrané");
         }
     }
 }
