@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ruzicka.ets.db.Objednavka;
 
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -16,5 +17,7 @@ public interface ObjednavkaRepository extends JpaRepository<Objednavka, Integer>
 
     List<Objednavka> findByStatusAndId(String variableSymbol,Integer idzakaznik);
 
-  //  List<Objednavka> findByZakaznikIdzakaznik(Integer zakaznikId);
+    List<Objednavka> findByDatumcasBeforeAndStatus(Instant tenMinutesAgo, String res);
+
+    //  List<Objednavka> findByZakaznikIdzakaznik(Integer zakaznikId);
 }
