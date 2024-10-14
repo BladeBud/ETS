@@ -13,6 +13,7 @@ import ruzicka.ets.db.Objednavka;
 import ruzicka.ets.db.misto;
 import ruzicka.ets.dto.EventInfoDTO;
 import ruzicka.ets.dto.OrderRequestDTO;
+import ruzicka.ets.dto.OrderResponseDTO;
 import ruzicka.ets.repository.MistoRepository;
 import ruzicka.ets.service.ObjednavkaService;
 
@@ -59,12 +60,17 @@ public class OrderController {
     }
 
     @PostMapping("/order")
-    public ResponseEntity<String> createOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
-        boolean isCreated = objednavkaService.createOrder(orderRequestDTO);
-        if (isCreated) {
-            return ResponseEntity.ok("Objednávka proběhla úspěšně");
+    public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
+        Objednavka objednavka = objednavkaService.createOrder(orderRequestDTO);
+        if (objednavka != null) {
+            OrderResponseDTO response = new OrderResponseDTO(
+                    objednavka.getIdzakaznik().getIdzakaznik(),
+                    objednavka.getIdmisto().getIdtypmista().getCena(),
+                    "123456789" // Placeholder for the bank account number
+            );
+            return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Místo je už zabrané");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 }

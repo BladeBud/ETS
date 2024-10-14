@@ -1,15 +1,22 @@
 package ruzicka.ets.dto;
 
+import org.springframework.beans.factory.annotation.Value;
+
 /**
  * @author czech
  * @since 2024-10-14
  */
 
 public class OrderRequestDTO {
+//--------------------------------------------------------------------------------------------------------------------
+    @Value("${banking.details}")
+    private String bankingDetails;
     private Integer idzak;
     private Integer adresa;
     private Integer quantity;
     private String email;
+    private int cena;
+//----------------------------------------------------------------------------------------------------------------------
 
     // Getters and Setters
     public Integer getIdzak() {
@@ -42,5 +49,23 @@ public class OrderRequestDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getBankingDetails() {
+        return bankingDetails;
+    }
+
+    public OrderRequestDTO setBankingDetails(String bankingDetails) {
+        this.bankingDetails = bankingDetails;
+        return this;
+    }
+
+    public int getCena() {
+        return cena;
+    }
+
+    public OrderRequestDTO setCena(int cena) {
+        this.cena = cena;
+        return this;
     }
 }

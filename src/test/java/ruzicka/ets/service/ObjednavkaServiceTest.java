@@ -6,24 +6,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import ruzicka.ets.db.Objednavka;
+import ruzicka.ets.db.Zakaznik;
 import ruzicka.ets.db.misto;
 import ruzicka.ets.dto.OrderRequestDTO;
 import ruzicka.ets.repository.MistoRepository;
 import ruzicka.ets.repository.ObjednavkaRepository;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-/**
- * @author czech
- * @since 2024-10-14
- */
 class ObjednavkaServiceTest {
-
 
     @Mock
     private ObjednavkaRepository objednavkaRepository;
@@ -40,55 +36,52 @@ class ObjednavkaServiceTest {
     }
 
     @Test
-    void testCreateOrder_AddressAlreadyReserved() {
+    void testCreateOrder_Success() {
         OrderRequestDTO orderRequest = new OrderRequestDTO();
         orderRequest.setAdresa(1);
-        orderRequest.setQuantity(5);
+        orderRequest.setQuantity(1);
 
-        // Mock the behavior of the repository
-        when(objednavkaRepository.findByAdresaAndStatus(anyInt(), any(String.class)))
+        misto availableMisto = new misto();
+        when(mistoRepository.findByAdresaAndAvailableQuantity(any(Integer.class), any(Integer.class)))
+                .thenReturn(Collections.singletonList(availableMisto));
+
+        when(objednavkaRepository.save(any(Objednavka.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        Objednavka result = objednavkaService.createOrder(orderRequest);
+
+        assertNotNull(result);
+        assertEquals("R", result.getStatus());
+        verify(objednavkaRepository, times(1)).save(any(Objednavka.class));
+    }
+
+    @Test
+    void testCreateOrder_AddressReserved() {
+        OrderRequestDTO orderRequest = new OrderRequestDTO();
+        orderRequest.setAdresa(1);
+        orderRequest.setQuantity(1);
+
+        when(objednavkaRepository.findByIdmisto_AdresaAndStatus(any(Integer.class), eq("R")))
                 .thenReturn(Collections.singletonList(new Objednavka()));
 
-        boolean result = objednavkaService.createOrder(orderRequest);
+        Objednavka result = objednavkaService.createOrder(orderRequest);
 
-        assertFalse(result);
+        assertNull(result);
+        verify(objednavkaRepository, never()).save(any(Objednavka.class));
     }
 
     @Test
     void testCreateOrder_QuantityNotAvailable() {
         OrderRequestDTO orderRequest = new OrderRequestDTO();
         orderRequest.setAdresa(1);
-        orderRequest.setQuantity(5);
+        orderRequest.setQuantity(1);
 
-        // Mock the behavior of the repository
-        when(objednavkaRepository.findByAdresaAndStatus(anyInt(), any(String.class)))
-                .thenReturn(Collections.emptyList());
-        when(mistoRepository.findByAdresaAndAvailableQuantity(anyInt(), anyInt()))
+        when(mistoRepository.findByAdresaAndAvailableQuantity(any(Integer.class), any(Integer.class)))
                 .thenReturn(Collections.emptyList());
 
-        boolean result = objednavkaService.createOrder(orderRequest);
+        Objednavka result = objednavkaService.createOrder(orderRequest);
 
-        assertFalse(result);
-    }
-
-    @Test
-    void testCreateOrder_Success() {
-        OrderRequestDTO orderRequest = new OrderRequestDTO();
-        orderRequest.setAdresa(1);
-        orderRequest.setQuantity(5);
-
-        misto availableMisto = new misto();
-
-        // Mock the behavior of the repository
-        when(objednavkaRepository.findByAdresaAndStatus(anyInt(), any(String.class)))
-                .thenReturn(Collections.emptyList());
-        when(mistoRepository.findByAdresaAndAvailableQuantity(anyInt(), anyInt()))
-                .thenReturn(Collections.singletonList(availableMisto));
-        when(objednavkaRepository.save(any(Objednavka.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-
-        boolean result = objednavkaService.createOrder(orderRequest);
-
-        assertTrue(result);
+        assertNull(result);
+        verify(objednavkaRepository, never()).save(any(Objednavka.class));
     }
 }
