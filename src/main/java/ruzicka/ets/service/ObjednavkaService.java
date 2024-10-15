@@ -15,8 +15,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
- * @author czech
- * @since 2024-10-05
+ * The {@code ObjednavkaService} class provides methods to manage orders, including operations such as finding,
+ * creating, and reserving orders, as well as releasing expired reservations.
  */
 @Service
 public class ObjednavkaService {
@@ -26,8 +26,6 @@ public class ObjednavkaService {
     @Autowired
     private MistoRepository mistoRepository;
 
-//    @Value("${banking.details}")
-//    private String cisloUctu;
 //----------------------------------------------------------------------------------------------------------------------
     public List<Objednavka> findOrdersByZakaznikId(Integer zakaznikId) {
         return objednavkaRepository.findByIdzakaznik_Idzakaznik(zakaznikId);
@@ -40,12 +38,20 @@ public class ObjednavkaService {
         return objednavkaRepository.save(objednavka);
     }
 
+    /**
+     * Reserves the given order.
+     * @param objednavka
+     * @return save objednavka
+     */
     public Objednavka reserveOrder(Objednavka objednavka) {
         objednavka.setDatumcas(Instant.now());
         objednavka.setStatus("R"); // R for Reserved
         return objednavkaRepository.save(objednavka);
     }
 
+    /**
+     * Releases expired reservations.
+     */
     public void releaseExpiredReservations() {
         Instant tenMinutesAgo = Instant.now().minus(10, ChronoUnit.MINUTES);
         List<Objednavka> expiredReservations = objednavkaRepository.findByDatumcasBeforeAndStatus(tenMinutesAgo, "R");
@@ -55,6 +61,11 @@ public class ObjednavkaService {
         }
     }
 
+    /**
+     * Creates an order for the given {@code OrderRequestDTO} object.
+     * @param orderRequest
+     * @return objednavka
+     */
     public Objednavka createOrder(OrderRequestDTO orderRequest) {
         // Check if the address is already reserved
         if (isAddressReserved(orderRequest.getAdresa())) {
@@ -69,7 +80,7 @@ public class ObjednavkaService {
 
         // Create the order
         Objednavka objednavka = new Objednavka();
-        Zakaznik zakaznik = new Zakaznik();  // It's assumed that Zakaznik should be created separately
+        Zakaznik zakaznik = new Zakaznik();
         objednavka.setIdzakaznik(zakaznik);
         objednavka.setIdmisto(availableMisto.get(0));
         objednavka.setQuantity(orderRequest.getQuantity());
@@ -81,6 +92,11 @@ public class ObjednavkaService {
         return objednavka;
     }
 
+    /**
+     * Checks if the given address is already reserved.
+     * @param adresa
+     * @return true if the address is reserved, false otherwise
+     */
     private boolean isAddressReserved(Integer adresa) {
         List<Objednavka> reservedOrders = objednavkaRepository.findByIdmisto_AdresaAndStatus(adresa, "R");
         return !reservedOrders.isEmpty();

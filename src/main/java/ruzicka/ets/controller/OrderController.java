@@ -1,6 +1,7 @@
 package ruzicka.ets.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -25,6 +26,10 @@ import java.util.stream.Collectors;
  * @since 2024-09-30
  */
 
+/**
+ * The {@code OrderController} class is a REST controller responsible for handling order-related operations including
+ * retrieving event information, reserving orders, cleaning up expired reservations, and creating orders.
+ */
 @RestController
 public class OrderController {
 //----------------------------------------------------------------------------------------------------------------------
@@ -34,8 +39,18 @@ public class OrderController {
 
     @Autowired
     private ObjednavkaService objednavkaService;
+    @Value("${banking.details}")
+    private String cisloUctu;
 
 //----------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Retrieves a list of event information based on the given address and available quantity.
+     *
+     * @param adresa           the address identifier to filter the events
+     * @param avaiableQuantity the number of available quantities to filter the events
+     * @return a list of {@code EventInfoDTO} objects containing the event information
+     */
     @GetMapping("/misto")
     public List<EventInfoDTO> getEventInfo(@RequestParam Integer adresa, @RequestParam Integer avaiableQuantity) {
         List<misto> mistoList = mistoRepository.findByAdresaAndAvailableQuantity(adresa, avaiableQuantity);
@@ -49,16 +64,40 @@ public class OrderController {
         }).collect(Collectors.toList());
     }
  //----------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Reserves an order by delegating it to the objednavkaService.
+     *
+     * @param objednavka the order to be reserved
+     * @return the reserved order
+     */
     @PostMapping("/reserve")
     public Objednavka reserveOrder(@RequestBody Objednavka objednavka) {
         return objednavkaService.reserveOrder(objednavka);
     }
+//----------------------------------------------------------------------------------------------------------------------
 
-    @Scheduled(fixedRate = 600000) // TODO: Run every 10 minutes (domluvit se na nacasovani)
+    /**
+     * This method is executed at a fixed interval to clean up expired reservations.
+     * It delegates the task of releasing expired reservations to the objednavkaService.
+     *
+     * The method is scheduled to run every 10 minutes.
+     */
+    @Scheduled(fixedRate = 600000) // TODO: Run every 10 minutes (domluvit se na nacasovani pokus se bude upravovat uparvit i v releaseexpiredreservations)
     public void cleanupExpiredReservations() {
         objednavkaService.releaseExpiredReservations();
     }
+//----------------------------------------------------------------------------------------------------------------------
 
+    /**
+     * Creates an order based on the given {@code OrderRequestDTO} object.
+     * If the order is successfully created, returns an {@code OrderResponseDTO}.
+     * Otherwise, returns a {@code BAD_REQUEST} status.
+     *
+     * @param orderRequestDTO the data transfer object containing the details of the order to be created
+     * @return a {@code ResponseEntity} containing an {@code OrderResponseDTO} if the order was successfully created, or a {@code BAD_REQUEST} status if the order creation failed
+     *
+     */
     @PostMapping("/order")
     public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
         Objednavka objednavka = objednavkaService.createOrder(orderRequestDTO);
@@ -66,7 +105,7 @@ public class OrderController {
             OrderResponseDTO response = new OrderResponseDTO(
                     objednavka.getIdzakaznik().getIdzakaznik(),
                     objednavka.getIdmisto().getIdtypmista().getCena(),
-                    "123456789" // Placeholder for the bank account number
+                    cisloUctu //TODO: Change to real bank account number
             );
             return ResponseEntity.ok(response);
         } else {

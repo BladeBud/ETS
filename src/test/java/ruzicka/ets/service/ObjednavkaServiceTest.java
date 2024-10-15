@@ -6,14 +6,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import ruzicka.ets.db.Objednavka;
-import ruzicka.ets.db.Zakaznik;
 import ruzicka.ets.db.misto;
 import ruzicka.ets.dto.OrderRequestDTO;
 import ruzicka.ets.repository.MistoRepository;
 import ruzicka.ets.repository.ObjednavkaRepository;
 
 import java.util.Collections;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
