@@ -13,9 +13,14 @@ import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+/**
+ * Represents a customer in the system.
+ * Each instance of this class corresponds to a record in the "zakaznik" table.
+ */
 @Entity
 @Table(name = "zakaznik")
 public class Zakaznik {
+    //----------------------------------------------------------------------------------------------------------------------
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "idzakaznik", nullable = false)
@@ -35,7 +40,7 @@ public class Zakaznik {
 
     @Column(name = "caspotvrzeni")
     private Timestamp caspotvrzeni;
-
+    //----------------------------------------------------------------------------------------------------------------------
     // Getters and Setters
     public Integer getIdzakaznik() {
         return idzakaznik;

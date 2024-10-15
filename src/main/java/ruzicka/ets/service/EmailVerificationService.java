@@ -32,6 +32,13 @@ public class EmailVerificationService {
     private String PASSWORD;
   //--------------------------------------------------------------------------------------------------------------------
 
+    /**
+     * Sends a verification email to a specified customer.
+     *
+     * @param zakaznik the customer to whom the verification email will be sent
+     * @param subject the subject of the verification email
+     * @param messageContent the body content of the verification email
+     */
     public void sendVerificationEmail(Zakaznik zakaznik, String subject, String messageContent) {
         Integer zakaznikId = zakaznik.getIdzakaznik();
 
@@ -45,7 +52,15 @@ public class EmailVerificationService {
         emailSender.send(message);
         System.out.println("Verification email sent to " + zakaznik.getMail());
     }
+//--------------------------------------------------------------------------------------------------------------------
 
+    /**
+     * Verifies the email address of a customer by updating their status and confirmation timestamp.
+     *
+     * @param email The email address to be verified.
+     * @param id The unique ID of the customer.
+     * @return {@code true} if the email was successfully verified; {@code false} otherwise.
+     */
     public boolean verifyEmail(String email, Integer id) {
         Optional<Zakaznik> zakaznikOptional = zakaznikRepository.findByMail(email);
         if (zakaznikOptional.isPresent()) {

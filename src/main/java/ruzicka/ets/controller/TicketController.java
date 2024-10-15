@@ -17,10 +17,13 @@ import java.util.Optional;
  * @since 2023-10-03
  */
 
+/**
+ * REST controller for managing customers' ticket-related operations.
+ */
 @RestController
 @RequestMapping("/api/tickets")
 public class TicketController {
-
+//----------------------------------------------------------------------------------------------------------------------
     @Autowired
     private ZakaznikRepository zakaznikRepository;
 
@@ -29,7 +32,17 @@ public class TicketController {
 
     @Autowired
     private EmailVerificationService emailService;
-
+//----------------------------------------------------------------------------------------------------------------------
+    /**
+     * Handles the login or registration process for customers.
+     * If the customer exists and is verified, returns their orders.
+     * If not verified, asks for email verification.
+     * If the customer does not exist, creates a new record and sends a verification email.
+     *
+     * @param email The email of the customer attempting to log in or register.
+     * @return A ResponseEntity containing the status and message or list of orders,
+     *         based on the customer's verification status and existence in the system.
+     */
     @PostMapping("/login-register")
     public ResponseEntity<?> loginOrRegister(@RequestBody String email) {
         Optional<Zakaznik> existingUser = zakaznikRepository.findByMail(email);
@@ -54,7 +67,16 @@ public class TicketController {
             return ResponseEntity.ok("Verification email sent.");
         }
     }
+//----------------------------------------------------------------------------------------------------------------------
 
+    /**
+     * Endpoint to verify a customer's email address based on the provided email and ID.
+     *
+     * @param email The email address to be verified.
+     * @param id The unique ID of the customer.
+     * @return A ResponseEntity containing a success message if the email is verified,
+     *         or an error message if the verification fails.
+     */
     @GetMapping("/verify-email")
     public ResponseEntity<String> verifyEmail(@RequestParam String email, @RequestParam Integer id) {
         boolean verified = emailService.verifyEmail(email, id);

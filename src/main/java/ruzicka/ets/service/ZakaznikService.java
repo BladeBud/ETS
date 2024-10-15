@@ -1,6 +1,5 @@
 package ruzicka.ets.service;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ruzicka.ets.db.Zakaznik;
@@ -12,12 +11,12 @@ import java.util.Optional;
  * @author czech
  * @since 2024-10-06
  */
-
-
-
+/**
+ * The {@code ZakaznikService} class provides methods to manage customers, including operations such as finding and saving
+ */
 @Service
 public class ZakaznikService {
-
+//----------------------------------------------------------------------------------------------------------------------
     @Autowired
     private ZakaznikRepository zakaznikRepository;
 

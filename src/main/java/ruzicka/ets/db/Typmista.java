@@ -14,6 +14,7 @@ import java.util.Set;
 @Entity
 @Table(name = "typmista")
 public class Typmista {
+    //----------------------------------------------------------------------------------------------------------------------
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "idtypmista", nullable = false)
@@ -24,7 +25,7 @@ public class Typmista {
 
     @Column(name = "cena", nullable = false)
     private Integer cena;
-
+    //----------------------------------------------------------------------------------------------------------------------
     // Getters and Setters
     public Integer getIdtypmista() {
         return idtypmista;

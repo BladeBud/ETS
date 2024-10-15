@@ -1,7 +1,6 @@
 package ruzicka.ets.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ruzicka.ets.db.Objednavka;
 import ruzicka.ets.db.Zakaznik;
@@ -37,7 +36,7 @@ public class ObjednavkaService {
     public Objednavka save(Objednavka objednavka) {
         return objednavkaRepository.save(objednavka);
     }
-
+//----------------------------------------------------------------------------------------------------------------------
     /**
      * Reserves the given order.
      * @param objednavka
@@ -48,7 +47,7 @@ public class ObjednavkaService {
         objednavka.setStatus("R"); // R for Reserved
         return objednavkaRepository.save(objednavka);
     }
-
+//----------------------------------------------------------------------------------------------------------------------
     /**
      * Releases expired reservations.
      */
@@ -60,7 +59,7 @@ public class ObjednavkaService {
             objednavkaRepository.save(objednavka);
         }
     }
-
+//----------------------------------------------------------------------------------------------------------------------
     /**
      * Creates an order for the given {@code OrderRequestDTO} object.
      * @param orderRequest
@@ -91,7 +90,7 @@ public class ObjednavkaService {
 
         return objednavka;
     }
-
+//----------------------------------------------------------------------------------------------------------------------
     /**
      * Checks if the given address is already reserved.
      * @param adresa

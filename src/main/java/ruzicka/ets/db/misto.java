@@ -14,9 +14,14 @@ import jakarta.persistence.Table;
  * @author czech
  * @since 2024-09-30
  */
+
+/**
+ * Represents a 'misto' entity with details such as address, type, availability, and quantity information.
+ */
 @Entity
 @Table(name = "misto")
 public class misto {
+//----------------------------------------------------------------------------------------------------------------------
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "idmisto", nullable = false)
@@ -34,7 +39,7 @@ public class misto {
 
     @Column(name = "quantitysum", nullable = false)
     private Integer quantitySum;
-
+//----------------------------------------------------------------------------------------------------------------------
     // Getters and Setters
     public Integer getIdmisto() {
         return idmisto;

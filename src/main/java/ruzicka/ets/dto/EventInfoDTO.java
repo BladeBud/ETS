@@ -4,12 +4,18 @@ package ruzicka.ets.dto;
  * @author czech
  * @since 2024-09-30
  */
+
+/**
+ * Data Transfer Object (DTO) class for event information.
+ */
 public class EventInfoDTO {
+//----------------------------------------------------------------------------------------------------------------------
     private Integer adresa;
     private Integer avaiablequantity;
     private Integer idzakaznik;
     private Integer cena;
-
+//----------------------------------------------------------------------------------------------------------------------
+    // Getters and Setters
     public Integer getAdresa() {
         return adresa;
     }

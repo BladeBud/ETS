@@ -12,9 +12,14 @@ import jakarta.persistence.Table;
 
 import java.time.Instant;
 
+/**
+ * Represents an order in the system.
+ * Each instance of this class corresponds to a record in the "objednavka" table.
+ */
 @Entity
 @Table(name = "objednavka")
 public class Objednavka {
+//----------------------------------------------------------------------------------------------------------------------
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "idobjednavaka", nullable = false)
@@ -39,7 +44,7 @@ public class Objednavka {
 
     @Column(name = "status", nullable = false, length = 3)
     private String status;
-
+//----------------------------------------------------------------------------------------------------------------------
     // Getters and Setters
     public Integer getId() {
         return id;

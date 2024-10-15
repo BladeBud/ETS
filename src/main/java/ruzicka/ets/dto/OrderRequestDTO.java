@@ -7,6 +7,11 @@ import org.springframework.beans.factory.annotation.Value;
  * @since 2024-10-14
  */
 
+/**
+ * Data Transfer Object for creating an order request.
+ * This class holds the necessary details required for creating an order
+ * such as banking details, address, quantity, email, and price.
+ */
 public class OrderRequestDTO {
 //--------------------------------------------------------------------------------------------------------------------
     @Value("${banking.details}")
