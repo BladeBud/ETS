@@ -1,5 +1,9 @@
 package ruzicka.ets.service;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
 import jakarta.annotation.PostConstruct;
 import jakarta.mail.BodyPart;
 import jakarta.mail.Flags;
@@ -11,6 +15,11 @@ import jakarta.mail.Store;
 import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.search.FlagTerm;
 import jakarta.mail.internet.*;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -22,10 +31,15 @@ import org.springframework.mail.javamail.JavaMailSender;
 import ruzicka.ets.db.Objednavka;
 import ruzicka.ets.repository.ZakaznikRepository;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.UUID;
 
 /**
 
@@ -310,14 +324,77 @@ public class EmailCheckerService {
         }
     }
 //----------------------------------------------------------------------------------------------------------------------
+
     /**
-     * Generates a ticket file for the given order.
+     * Generates a PDF ticket file for the given order.
+     *
+     * @param order The order for which the ticket is to be generated. The order object must contain valid customer and address information.
+     * @return A temporary File object representing the generated PDF ticket.
+     * @throws IOException If an error occurs during file or PDF creation.
      */
-    private File generateTicketFile(Objednavka order) throws IOException {
-        // TODO: Implement ticket generation logic (e.g., create PDF, image, etc.)
+    public File generateTicketFile(Objednavka order) throws IOException {
+        // Create a temporary file for the ticket
         File tempFile = File.createTempFile("Ticket_" + order.getId(), ".pdf");
-        // Write ticket content to tempFile
+
+        // Create a new PDF document
+        try (PDDocument document = new PDDocument()) {
+            // Add a blank page
+            PDPage page = new PDPage();
+            document.addPage(page);
+
+            // Create a content stream for writing into the PDF
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+                // Set font and write the customer's name
+                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);
+                contentStream.beginText();
+                contentStream.newLineAtOffset(50, 750);  // X and Y position
+                contentStream.showText("Customer Name: " + order.getIdzakaznik().getJmeno());
+                contentStream.endText();
+
+                // Write the address (from idmisto)
+                contentStream.beginText();
+                contentStream.newLineAtOffset(50, 730);  // Move slightly down for the address
+                contentStream.showText("Address: " + order.getIdmisto().getAdresa());
+                contentStream.endText();
+
+                // Generate the QR code and add it to the PDF
+                String qrCodeData = "Order ID: " + order.getId() + ", Customer Name: " + order.getIdzakaznik().getJmeno();
+                String qrCodeFilePath = generateQRCodeImage(qrCodeData, 150, 150);  // Generate QR code image
+
+                // Add QR code to the PDF
+                BufferedImage qrImage = ImageIO.read(new File(qrCodeFilePath));
+                PDImageXObject pdImage = PDImageXObject.createFromFile(qrCodeFilePath, document);
+                contentStream.drawImage(pdImage, 50, 550);  // X and Y coordinates for the image
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            // Save the PDF document to the temporary file
+            document.save(tempFile);
+        }
+
         return tempFile;
     }
+    //----------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Generates a QR code image from the provided text and saves it to a unique file.
+     *
+     * @param text The text to be encoded into the QR code.
+     * @param width The width of the generated QR code image.
+     * @param height The height of the generated QR code image.
+     * @return The file path of the generated QR code image.
+     * @throws Exception If there is an error during QR code generation or image writing.
+     */
+    private String generateQRCodeImage(String text, int width, int height) throws Exception {
+        String qrCodeFilePath = "qr_" + UUID.randomUUID() + ".png";  // Unique QR code image filename
+        BitMatrix bitMatrix = new MultiFormatWriter().encode(text, BarcodeFormat.QR_CODE, width, height);
+
+        Path path = FileSystems.getDefault().getPath(qrCodeFilePath);
+        MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
+
+        return qrCodeFilePath;
+    }
+
 
 }
