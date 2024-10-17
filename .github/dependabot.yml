@@ -1,25 +1,3 @@
 version: 2
 updates:
-  interval: daily
-packages:
-  - ecosystem: maven
-  - ecosystem: npm
-  - ecosystem: pip
-  - ecosystem: composer
-  - ecosystem: nuget
-ignore:
-  - paths:
-    - vendor
-    - node_modules
-  - dependencies:
-    - some-dependency
-versions:
-  - major-version: false
-review:
-  labels:
-    - "dependabot: security update"
-    - "dependabot: patch update"
-    - "dependabot: minor update"
-    - "dependabot: major update"
-  comment:
-    title: "Dependabot wants to update dependencies"
+  - interval: daily
