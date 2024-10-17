@@ -69,9 +69,12 @@ public class EmailCheckerService {
     }
 
     private void checkEmailLoop() {
+        System.out.println("Starting email checking loop...");
         while (true) {
             try {
+                System.out.println("Checking for new emails...");
                 checkForNewEmails();
+                System.out.println("Sleeping for 60 seconds before next check...");
                 Thread.sleep(60000); // Check every 60 seconds
             } catch (Exception e) {
                 e.printStackTrace();
@@ -80,13 +83,15 @@ public class EmailCheckerService {
     }
 
     /**
-     * Checks for new unread emails from the configured email account. If a bank email
-     * is found, the method extracts payment information and processes it.
+     * Continuously checks for new unread emails from the configured email account.
+     * If a bank email is found, the method processes all such emails.
      *
      * @throws MessagingException If there is an error in the messaging operations.
      * @throws IOException If there is an error in reading the email content.
      */
     private void checkForNewEmails() throws MessagingException, IOException {
+        System.out.println("Connecting to the email server...");
+
         Properties properties = new Properties();
         properties.put("mail.store.protocol", "imaps");
         Session session = Session.getDefaultInstance(properties, null);
@@ -97,26 +102,45 @@ public class EmailCheckerService {
         Folder inbox = store.getFolder("INBOX");
         inbox.open(Folder.READ_WRITE);
 
-        // Search for unread emails
+        // Search for all unread emails
         Message[] messages = inbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
+        System.out.println("Found " + messages.length + " unread emails.");
 
+        // Process each unread message
         for (Message message : messages) {
-            // Check if the email is from the bank or specific sender
+            System.out.println("Processing email from: " + message.getFrom()[0].toString());
+
+            // Check if the email is from the specific sender (e.g., bank)
             if (isBankEmail(message)) {
+                System.out.println("Email is from the bank. Extracting content...");
+
                 String content = getTextFromMessage(message);
+                System.out.println("Email content extracted: " + content);
+
                 String variableSymbol = extractVariableSymbol(content);
                 int amount = extractAmount(content);
 
-                // Validate the payment
+                System.out.println("Extracted variable symbol: " + variableSymbol);
+                System.out.println("Extracted amount: " + amount);
+
+                // Validate and process payment
                 if (variableSymbol != null && amount > 0 && validateAndProcessPayment(variableSymbol, amount)) {
                     System.out.println("Payment verified for order with symbol: " + variableSymbol);
-                    message.setFlag(Flags.Flag.SEEN, true); // Mark message as read after processing
+                } else {
+                    System.out.println("Payment validation failed for email.");
                 }
+
+                // Mark the email as read after processing
+                message.setFlag(Flags.Flag.SEEN, true);
+                System.out.println("Email marked as read.");
+            } else {
+                System.out.println("Email is not from the bank. Skipping.");
             }
         }
 
-        inbox.close(false); // Don't expunge, just close
+        inbox.close(false); // Close folder without expunging
         store.close();
+        System.out.println("Disconnected from the email server.");
     }
 
     /**
@@ -127,8 +151,11 @@ public class EmailCheckerService {
      * @throws MessagingException If there is an error while retrieving the sender's address.
      */
     private boolean isBankEmail(Message message) throws MessagingException {
-        return message.getFrom()[0].toString().contains("adam.ruzicka@email.cz"); // Change to actual bank email
+        boolean isFromBank = message.getFrom()[0].toString().contains("adam.ruzicka@email.cz"); // Change to actual bank email
+        System.out.println("Checking if email is from the bank: " + isFromBank);
+        return isFromBank;
     }
+
 
     /**
      * Extracts the variable symbol from the email content.
