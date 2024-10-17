@@ -41,7 +41,7 @@ import java.util.Properties;
  */
 @Service
 public class EmailCheckerService {
-//----------------------------------------------------------------------------------------------------------------------
+
     private static final String HOST = "imap.seznam.cz";
 
     @Value("${email.username}")
@@ -58,7 +58,7 @@ public class EmailCheckerService {
 
     @Autowired
     private JavaMailSender emailSender;
-//----------------------------------------------------------------------------------------------------------------------
+
     @PostConstruct
     public void init() {
         startEmailCheckingService();
@@ -72,13 +72,12 @@ public class EmailCheckerService {
         while (true) {
             try {
                 checkForNewEmails();
-                Thread.sleep(60000); //TODO: domluvit se na to kolik casu to ma byt momentalne 1min
+                Thread.sleep(60000); // Check every 60 seconds
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
-//----------------------------------------------------------------------------------------------------------------------
 
     /**
      * Checks for new unread emails from the configured email account. If a bank email
@@ -95,42 +94,30 @@ public class EmailCheckerService {
         Store store = session.getStore("imaps");
         store.connect(HOST, username, password);
 
-        Folder inbox = store.getFolder("inbox");
+        Folder inbox = store.getFolder("INBOX");
         inbox.open(Folder.READ_WRITE);
 
-        boolean bankEmailFound = false;
+        // Search for unread emails
+        Message[] messages = inbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
 
-        while (!bankEmailFound) {
-            Message[] messages = inbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
+        for (Message message : messages) {
+            // Check if the email is from the bank or specific sender
+            if (isBankEmail(message)) {
+                String content = getTextFromMessage(message);
+                String variableSymbol = extractVariableSymbol(content);
+                int amount = extractAmount(content);
 
-            for (Message message : messages) {
-                if (isBankEmail(message)) {
-                    bankEmailFound = true;
-                    String content = getTextFromMessage(message);
-
-                    String variableSymbol = extractVariableSymbol(content);
-                    int amount = extractAmount(content);
-
-                    if (variableSymbol != null && amount > 0 && validateAndProcessPayment(variableSymbol, amount)) {
-                        System.out.println("Payment verified for order with symbol: " + variableSymbol);
-                    }
-                }
-            }
-
-            if (!bankEmailFound) {
-                System.out.println("No bank email found. Sleeping for 60 seconds.");
-                try {
-                    Thread.sleep(60000); //TODO: taky zmenit
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                // Validate the payment
+                if (variableSymbol != null && amount > 0 && validateAndProcessPayment(variableSymbol, amount)) {
+                    System.out.println("Payment verified for order with symbol: " + variableSymbol);
+                    message.setFlag(Flags.Flag.SEEN, true); // Mark message as read after processing
                 }
             }
         }
 
-        inbox.close(false);
+        inbox.close(false); // Don't expunge, just close
         store.close();
     }
-//----------------------------------------------------------------------------------------------------------------------
 
     /**
      * Checks if the sender of the specified email message matches the bank's email address.
@@ -140,16 +127,14 @@ public class EmailCheckerService {
      * @throws MessagingException If there is an error while retrieving the sender's address.
      */
     private boolean isBankEmail(Message message) throws MessagingException {
-        return message.getFrom()[0].toString().contains("adam.ruzicka@email.cz"); //TODO: Change to bank's email
+        return message.getFrom()[0].toString().contains("adam.ruzicka@email.cz"); // Change to actual bank email
     }
-//----------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Extracts the variable symbol from the given content string. The method looks
-     * for the "Variable Symbol:" marker and retrieves the subsequent value.
+     * Extracts the variable symbol from the email content.
      *
-     * @param content The input string that contains the content from which to extract the variable symbol.
-     * @return The extracted variable symbol as a trimmed string, or null if the marker is not found.
+     * @param content The input string that contains the email content.
+     * @return The extracted variable symbol.
      */
     private String extractVariableSymbol(String content) {
         int index = content.indexOf("Variable Symbol:");
@@ -159,14 +144,12 @@ public class EmailCheckerService {
         }
         return null;
     }
-//----------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Extracts the amount value from the given content string. The method looks
-     * for the "Amount:" marker and retrieves the subsequent integer value.
+     * Extracts the amount value from the email content.
      *
-     * @param content The input string that contains the content from which to extract the amount.
-     * @return The extracted amount as an integer, or 0 if the marker is not found or parsing fails.
+     * @param content The input string that contains the email content.
+     * @return The extracted amount.
      */
     private int extractAmount(String content) {
         int index = content.indexOf("Amount:");
@@ -180,7 +163,6 @@ public class EmailCheckerService {
         }
         return 0;
     }
-//----------------------------------------------------------------------------------------------------------------------
 
     /**
      * Validates the provided variable symbol and amount and processes the payment if valid.
@@ -197,11 +179,10 @@ public class EmailCheckerService {
                 Objednavka order = orderOpt.get();
 
                 if (order.getCena().equals(amount)) {
-                    order.setStatus("P");
+                    order.setStatus("P"); // Payment processed
                     objednavkaRepository.save(order);
 
-                    sendTicketEmail(order);
-
+                    sendTicketEmail(order); // Send ticket after payment confirmation
                     return true;
                 } else {
                     System.out.println("Amount mismatch for order: " + variableSymbol);
@@ -214,14 +195,13 @@ public class EmailCheckerService {
         }
         return false;
     }
-//----------------------------------------------------------------------------------------------------------------------
 
     /**
      * Extracts the plain text content from an email message. This method handles
      * both "text/plain" and "multipart/*" MIME types.
      *
      * @param message The email message from which to extract the plain text content.
-     * @return The extracted plain text content of the email message.
+     * @return The extracted plain text content.
      * @throws MessagingException If there is an error in the messaging operations.
      * @throws IOException If there is an error in reading the email content.
      */
@@ -235,14 +215,13 @@ public class EmailCheckerService {
         }
         return result;
     }
-//----------------------------------------------------------------------------------------------------------------------
 
     /**
      * Extracts the plain text content from a MimeMultipart object. This method
      * iterates through the parts of the MimeMultipart to retrieve text/plain content.
      *
      * @param mimeMultipart The MimeMultipart object from which to extract the plain text content.
-     * @return The extracted plain text content as a string.
+     * @return The extracted plain text content.
      * @throws MessagingException If there is an error in accessing the MimeMultipart parts.
      * @throws IOException If there is an error in reading the content of the MimeMultipart parts.
      */
