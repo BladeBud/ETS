@@ -1,0 +1,10 @@
+version: 2
+updates:
+  minor: {}
+  patch: {}
+  security: {}
+pull-request-updates:
+  title: "Update dependencies"
+  body: |
+    This PR updates dependencies.
+    Please review and merge.
