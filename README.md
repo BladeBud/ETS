@@ -26,13 +26,12 @@ Configure environment variables: Create a .env file and add necessary environmen
 
 DATABASE_URL=mongodb://localhost:27017/event-tickets
 EMAIL_SERVICE_API_KEY=your_api_key
+or add in application.properties your own mail
 
 Run the development server:
 Bash
 
 npm start
-
-Při použití kódu buďte obezřetní.
 
 Usage
 
