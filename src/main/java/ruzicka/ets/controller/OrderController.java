@@ -105,7 +105,7 @@ public class OrderController {
             OrderResponseDTO response = new OrderResponseDTO(
                     objednavka.getIdzakaznik().getIdzakaznik(),
                     objednavka.getIdmisto().getIdtypmista().getCena(),
-                    cisloUctu //TODO: Change to real bank account number
+                    cisloUctu
             );
             return ResponseEntity.ok(response);
         } else {

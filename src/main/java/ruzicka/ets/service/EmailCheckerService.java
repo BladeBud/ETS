@@ -5,16 +5,9 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import jakarta.annotation.PostConstruct;
-import jakarta.mail.BodyPart;
-import jakarta.mail.Flags;
-import jakarta.mail.Folder;
-import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
-import jakarta.mail.Session;
-import jakarta.mail.Store;
-import jakarta.mail.internet.MimeMultipart;
-import jakarta.mail.search.FlagTerm;
+import jakarta.mail.*;
 import jakarta.mail.internet.*;
+import jakarta.mail.search.FlagTerm;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -23,12 +16,12 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import ruzicka.ets.db.Zakaznik;
-import ruzicka.ets.repository.ObjednavkaRepository;
-import org.springframework.mail.javamail.JavaMailSender;
 import ruzicka.ets.db.Objednavka;
+import ruzicka.ets.repository.ObjednavkaRepository;
 import ruzicka.ets.repository.ZakaznikRepository;
 
 import javax.imageio.ImageIO;
@@ -40,19 +33,9 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-/**
-
- * @author czech
- * @since 2023-10-03
- */
-
-/**
- * Service responsible for checking and processing emails for order payments.
- *
- * The service continuously monitors an email inbox for new emails from a specific bank,
- * extracts payment information, validates it, and processes corresponding orders.
- */
 @Service
 public class EmailCheckerService {
 
@@ -96,13 +79,6 @@ public class EmailCheckerService {
         }
     }
 
-    /**
-     * Continuously checks for new unread emails from the configured email account.
-     * If a bank email is found, the method processes all such emails.
-     *
-     * @throws MessagingException If there is an error in the messaging operations.
-     * @throws IOException If there is an error in reading the email content.
-     */
     private void checkForNewEmails() throws MessagingException, IOException {
         System.out.println("Connecting to the email server...");
 
@@ -116,15 +92,12 @@ public class EmailCheckerService {
         Folder inbox = store.getFolder("INBOX");
         inbox.open(Folder.READ_WRITE);
 
-        // Search for all unread emails
         Message[] messages = inbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
         System.out.println("Found " + messages.length + " unread emails.");
 
-        // Process each unread message
         for (Message message : messages) {
             System.out.println("Processing email from: " + message.getFrom()[0].toString());
 
-            // Check if the email is from the specific sender (e.g., bank)
             if (isBankEmail(message)) {
                 System.out.println("Email is from the bank. Extracting content...");
 
@@ -132,19 +105,17 @@ public class EmailCheckerService {
                 System.out.println("Email content extracted: " + content);
 
                 String variableSymbol = extractVariableSymbol(content);
-                int amount = extractAmount(content);
+                double amount = extractAmount(content);
 
                 System.out.println("Extracted variable symbol: " + variableSymbol);
                 System.out.println("Extracted amount: " + amount);
 
-                // Validate and process payment
                 if (variableSymbol != null && amount > 0 && validateAndProcessPayment(variableSymbol, amount)) {
                     System.out.println("Payment verified for order with symbol: " + variableSymbol);
                 } else {
                     System.out.println("Payment validation failed for email.");
                 }
 
-                // Mark the email as read after processing
                 message.setFlag(Flags.Flag.SEEN, true);
                 System.out.println("Email marked as read.");
             } else {
@@ -152,78 +123,58 @@ public class EmailCheckerService {
             }
         }
 
-        inbox.close(false); // Close folder without expunging
+        inbox.close(false);
         store.close();
         System.out.println("Disconnected from the email server.");
     }
 
-    /**
-     * Checks if the sender of the specified email message matches the bank's email address.
-     *
-     * @param message The email message to be checked.
-     * @return true if the email is from the bank; false otherwise.
-     * @throws MessagingException If there is an error while retrieving the sender's address.
-     */
     private boolean isBankEmail(Message message) throws MessagingException {
-        boolean isFromBank = message.getFrom()[0].toString().contains("adam.ruzicka@email.cz"); // Change to actual bank email
+        boolean isFromBank = message.getFrom()[0].toString().contains("automat@fio.cz");
         System.out.println("Checking if email is from the bank: " + isFromBank);
         return isFromBank;
     }
 
-
-    /**
-     * Extracts the variable symbol from the email content.
-     *
-     * @param content The input string that contains the email content.
-     * @return The extracted variable symbol.
-     */
     private String extractVariableSymbol(String content) {
-        int index = content.indexOf("Variable Symbol:");
-        if (index != -1) {
-            String symbol = content.substring(index + 16).split("\\s+")[0];
-            return symbol.trim();
+
+        Pattern pattern = Pattern.compile("VS:\\s*(\\d+)");
+        Matcher matcher = pattern.matcher(content);
+
+        if (matcher.find()) {
+            return matcher.group(1).trim(); // Vrátí nalezený VS
         }
-        return null;
+        return null; // Pokud VS nenajde, vrátíme null
     }
 
-    /**
-     * Extracts the amount value from the email content.
-     *
-     * @param content The input string that contains the email content.
-     * @return The extracted amount.
-     */
-    private int extractAmount(String content) {
-        int index = content.indexOf("Amount:");
-        if (index != -1) {
-            String amountStr = content.substring(index + 7).split("\\s+")[0];
-            try {
-                return Integer.parseInt(amountStr.trim());
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
+
+    private double extractAmount(String content) {
+        try {
+            // Použije regulární výraz k nalezení částky ve formátu X,XX
+            Pattern pattern = Pattern.compile("Částka:\\s*([\\d,]+)");
+            Matcher matcher = pattern.matcher(content);
+
+            if (matcher.find()) {
+                String amountStr = matcher.group(1).replace(",", "."); // Nahrazení čárky tečkou pro parsování
+                return Double.parseDouble(amountStr.trim());
             }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
         }
-        return 0;
+        return 0.0; // Pokud se nepodaří částku najít nebo převést, vrát 0
     }
 
-    /**
-     * Validates the provided variable symbol and amount and processes the payment if valid.
-     *
-     * @param variableSymbol The variable symbol of the order to be validated and processed.
-     * @param amount The amount to be validated against the order's expected amount.
-     * @return true if the payment is successfully validated and processed; false otherwise.
-     */
-    private boolean validateAndProcessPayment(String variableSymbol, int amount) {
+
+    private boolean validateAndProcessPayment(String variableSymbol, double amount) {
         try {
             Optional<Objednavka> orderOpt = objednavkaRepository.findById(Integer.parseInt(variableSymbol));
 
             if (orderOpt.isPresent()) {
                 Objednavka order = orderOpt.get();
 
-                if (order.getCena().equals(amount)) {
+                if (order.getCena() == amount) {
                     order.setStatus("P"); // Payment processed
                     objednavkaRepository.save(order);
 
-                    sendTicketEmail(order); // Send ticket after payment confirmation
+                    sendTicketEmail(order);
                     return true;
                 } else {
                     System.out.println("Amount mismatch for order: " + variableSymbol);
@@ -237,54 +188,6 @@ public class EmailCheckerService {
         return false;
     }
 
-    /**
-     * Extracts the plain text content from an email message. This method handles
-     * both "text/plain" and "multipart/*" MIME types.
-     *
-     * @param message The email message from which to extract the plain text content.
-     * @return The extracted plain text content.
-     * @throws MessagingException If there is an error in the messaging operations.
-     * @throws IOException If there is an error in reading the email content.
-     */
-    private String getTextFromMessage(Message message) throws MessagingException, IOException {
-        String result = "";
-        if (message.isMimeType("text/plain")) {
-            result = message.getContent().toString();
-        } else if (message.isMimeType("multipart/*")) {
-            MimeMultipart mimeMultipart = (MimeMultipart) message.getContent();
-            result = getTextFromMimeMultipart(mimeMultipart);
-        }
-        return result;
-    }
-
-    /**
-     * Extracts the plain text content from a MimeMultipart object. This method
-     * iterates through the parts of the MimeMultipart to retrieve text/plain content.
-     *
-     * @param mimeMultipart The MimeMultipart object from which to extract the plain text content.
-     * @return The extracted plain text content.
-     * @throws MessagingException If there is an error in accessing the MimeMultipart parts.
-     * @throws IOException If there is an error in reading the content of the MimeMultipart parts.
-     */
-    private String getTextFromMimeMultipart(MimeMultipart mimeMultipart) throws MessagingException, IOException {
-        StringBuilder result = new StringBuilder();
-        int count = mimeMultipart.getCount();
-        for (int i = 0; i < count; i++) {
-            BodyPart bodyPart = mimeMultipart.getBodyPart(i);
-            if (bodyPart.isMimeType("text/plain")) {
-                result.append(bodyPart.getContent());
-            }
-        }
-        return result.toString();
-    }
-//----------------------------------------------------------------------------------------------------------------------
-
-    /**
-     * Sends a ticket email to the customer associated with the given order.
-     * The email includes the customer's name, order details, and an attachment containing the tickets.
-     *
-     * @param order The order for which the tickets are to be sent. The order must contain valid customer information.
-     */
     private void sendTicketEmail(Objednavka order) {
         try {
             Optional<Zakaznik> zakaznikOpt = zakaznikRepository.findById(order.getIdzakaznik().getIdzakaznik());
@@ -298,23 +201,18 @@ public class EmailCheckerService {
                         + "Naviděnou,\n"
                         + "Vaše Oktávy";
 
-                // Create a MimeMessage
                 MimeMessage message = emailSender.createMimeMessage();
-
-                // Use MimeMessageHelper to attach files
                 MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
                 helper.setFrom(username);
-                helper.setTo(userEmail);      // Recipient email
+                helper.setTo(userEmail);
                 helper.setSubject(subject);
                 helper.setText(bodyText);
 
-                // Add ticket as an attachment (assuming tickets are generated as PDFs)
-                File ticketFile = generateTicketFile(order);  //TODO: Implement ticket generation logic
+                File ticketFile = generateTicketFile(order);
                 FileSystemResource file = new FileSystemResource(ticketFile);
                 helper.addAttachment("Ticket_" + order.getId() + ".pdf", file);
 
-                // Send the email
                 emailSender.send(message);
                 System.out.println("Tickets sent to " + userEmail + " for order ID: " + order.getId());
             }
@@ -323,78 +221,73 @@ public class EmailCheckerService {
             System.out.println("Failed to send ticket email for order ID: " + order.getId());
         }
     }
-//----------------------------------------------------------------------------------------------------------------------
 
-    /**
-     * Generates a PDF ticket file for the given order.
-     *
-     * @param order The order for which the ticket is to be generated. The order object must contain valid customer and address information.
-     * @return A temporary File object representing the generated PDF ticket.
-     * @throws IOException If an error occurs during file or PDF creation.
-     */
     public File generateTicketFile(Objednavka order) throws IOException {
-        // Create a temporary file for the ticket
         File tempFile = File.createTempFile("Ticket_" + order.getId(), ".pdf");
 
-        // Create a new PDF document
         try (PDDocument document = new PDDocument()) {
-            // Add a blank page
             PDPage page = new PDPage();
             document.addPage(page);
 
-            // Create a content stream for writing into the PDF
             try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
-                // Set font and write the customer's name
                 contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);
                 contentStream.beginText();
-                contentStream.newLineAtOffset(50, 750);  // X and Y position
+                contentStream.newLineAtOffset(50, 750);
                 contentStream.showText("Customer Name: " + order.getIdzakaznik().getJmeno());
                 contentStream.endText();
 
-                // Write the address (from idmisto)
                 contentStream.beginText();
-                contentStream.newLineAtOffset(50, 730);  // Move slightly down for the address
+                contentStream.newLineAtOffset(50, 730);
                 contentStream.showText("Address: " + order.getIdmisto().getAdresa());
                 contentStream.endText();
 
-                // Generate the QR code and add it to the PDF
                 String qrCodeData = "Order ID: " + order.getId() + ", Customer Name: " + order.getIdzakaznik().getJmeno();
-                String qrCodeFilePath = generateQRCodeImage(qrCodeData, 150, 150);  // Generate QR code image
+                String qrCodeFilePath = generateQRCodeImage(qrCodeData, 150, 150);
 
-                // Add QR code to the PDF
                 BufferedImage qrImage = ImageIO.read(new File(qrCodeFilePath));
                 PDImageXObject pdImage = PDImageXObject.createFromFile(qrCodeFilePath, document);
-                contentStream.drawImage(pdImage, 50, 550);  // X and Y coordinates for the image
+                contentStream.drawImage(pdImage, 50, 550);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
 
-            // Save the PDF document to the temporary file
             document.save(tempFile);
         }
 
         return tempFile;
     }
-    //----------------------------------------------------------------------------------------------------------------------
 
-    /**
-     * Generates a QR code image from the provided text and saves it to a unique file.
-     *
-     * @param text The text to be encoded into the QR code.
-     * @param width The width of the generated QR code image.
-     * @param height The height of the generated QR code image.
-     * @return The file path of the generated QR code image.
-     * @throws Exception If there is an error during QR code generation or image writing.
-     */
     private String generateQRCodeImage(String text, int width, int height) throws Exception {
-        String qrCodeFilePath = "qr_" + UUID.randomUUID() + ".png";  // Unique QR code image filename
-        BitMatrix bitMatrix = new MultiFormatWriter().encode(text, BarcodeFormat.QR_CODE, width, height);
+        String filePath = UUID.randomUUID() + "_QRCode.png";
+        Path path = FileSystems.getDefault().getPath(filePath);
 
-        Path path = FileSystems.getDefault().getPath(qrCodeFilePath);
-        MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
+        BitMatrix matrix = new MultiFormatWriter().encode(text, BarcodeFormat.QR_CODE, width, height);
+        MatrixToImageWriter.writeToPath(matrix, "PNG", path);
 
-        return qrCodeFilePath;
+        return filePath;
     }
 
+    private String getTextFromMessage(Message message) throws IOException, MessagingException {
+        if (message.isMimeType("text/plain")) {
+            return message.getContent().toString();
+        } else if (message.isMimeType("multipart/*")) {
+            MimeMultipart mimeMultipart = (MimeMultipart) message.getContent();
+            return getTextFromMimeMultipart(mimeMultipart);
+        }
+        return "";
+    }
 
+    private String getTextFromMimeMultipart(MimeMultipart mimeMultipart) throws IOException, MessagingException {
+        StringBuilder result = new StringBuilder();
+        int count = mimeMultipart.getCount();
+        for (int i = 0; i < count; i++) {
+            BodyPart bodyPart = mimeMultipart.getBodyPart(i);
+            if (bodyPart.isMimeType("text/plain")) {
+                result.append(bodyPart.getContent());
+            } else if (bodyPart.getContent() instanceof MimeMultipart) {
+                result.append(getTextFromMimeMultipart((MimeMultipart) bodyPart.getContent()));
+            }
+        }
+        return result.toString();
+    }
 }
