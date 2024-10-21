@@ -22,14 +22,14 @@ public class Objednavka {
 //----------------------------------------------------------------------------------------------------------------------
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name = "idobjednavaka", nullable = false)
+    @Column(name = "idobjednavka", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "idmisto",referencedColumnName = "idmisto", nullable = false)
     private misto idmisto;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "idzakaznik",referencedColumnName = "idzakaznik", nullable = false)
     private Zakaznik idzakaznik;
 

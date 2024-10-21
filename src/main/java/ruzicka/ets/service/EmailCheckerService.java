@@ -19,6 +19,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ruzicka.ets.db.Zakaznik;
 import ruzicka.ets.db.Objednavka;
 import ruzicka.ets.repository.ObjednavkaRepository;
@@ -145,7 +146,6 @@ public class EmailCheckerService {
         return null; // Pokud VS nenajde, vrátíme null
     }
 
-
     private double extractAmount(String content) {
         try {
             // Použije regulární výraz k nalezení částky ve formátu X,XX
@@ -161,7 +161,6 @@ public class EmailCheckerService {
         }
         return 0.0; // Pokud se nepodaří částku najít nebo převést, vrát 0
     }
-
 
     private boolean validateAndProcessPayment(String variableSymbol, double amount) {
         try {
@@ -188,12 +187,17 @@ public class EmailCheckerService {
         return false;
     }
 
+
     private void sendTicketEmail(Objednavka order) {
         try {
+            // Fully initialize the zakaznik entity within the transaction scope
             Optional<Zakaznik> zakaznikOpt = zakaznikRepository.findById(order.getIdzakaznik().getIdzakaznik());
 
             if (zakaznikOpt.isPresent()) {
                 Zakaznik zakaznik = zakaznikOpt.get();
+                // Lazy load problematic property may be fully initialized here
+                zakaznik.getIdzakaznik(); // Force load if necessary
+
                 String userEmail = zakaznik.getMail();
                 String subject = "Lístky pro objednávku: " + order.getId();
                 String bodyText = "Dobrý den " + zakaznik.getJmeno() + ",\n\n"
