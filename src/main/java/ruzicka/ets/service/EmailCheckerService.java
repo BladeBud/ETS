@@ -13,6 +13,8 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -39,8 +41,10 @@ import java.util.regex.Pattern;
 
 @Service
 public class EmailCheckerService {
-
+//----------------------------------------------------------------------------------
     private static final String HOST = "imap.seznam.cz";
+//    @Value("${spring.mail.host}")
+//    private String HOST;
 
     @Value("${email.username}")
     private String username;
@@ -56,7 +60,7 @@ public class EmailCheckerService {
 
     @Autowired
     private JavaMailSender emailSender;
-
+//-----------------------------------------------------------------------------------
     @PostConstruct
     public void init() {
         startEmailCheckingService();
@@ -65,7 +69,7 @@ public class EmailCheckerService {
     public void startEmailCheckingService() {
         new Thread(this::checkEmailLoop).start();
     }
-
+//-----------------------------------------------------------------------------------
     private void checkEmailLoop() {
         System.out.println("Starting email checking loop...");
         while (true) {
@@ -79,7 +83,7 @@ public class EmailCheckerService {
             }
         }
     }
-
+//-----------------------------------------------------------------------------------
     private void checkForNewEmails() throws MessagingException, IOException {
         System.out.println("Connecting to the email server...");
 
@@ -128,7 +132,7 @@ public class EmailCheckerService {
         store.close();
         System.out.println("Disconnected from the email server.");
     }
-
+//-----------------------------------------------------------------------------------
     private boolean isBankEmail(Message message) throws MessagingException {
         boolean isFromBank = message.getFrom()[0].toString().contains("automat@fio.cz");
         System.out.println("Checking if email is from the bank: " + isFromBank);
@@ -161,7 +165,7 @@ public class EmailCheckerService {
         }
         return 0.0; // Pokud se nepodaří částku najít nebo převést, vrát 0
     }
-
+//-----------------------------------------------------------------------------------
     private boolean validateAndProcessPayment(String variableSymbol, double amount) {
         try {
             Optional<Objednavka> orderOpt = objednavkaRepository.findById(Integer.parseInt(variableSymbol));
@@ -187,45 +191,53 @@ public class EmailCheckerService {
         return false;
     }
 
+//-----------------------------------------------------------------------------------
+private void sendTicketEmail(Objednavka order) {
+    try {
+        Optional<Zakaznik> zakaznikOpt = zakaznikRepository.findById(order.getIdzakaznik().getIdzakaznik());
 
-    private void sendTicketEmail(Objednavka order) {
-        try {
-            // Fully initialize the zakaznik entity within the transaction scope
-            Optional<Zakaznik> zakaznikOpt = zakaznikRepository.findById(order.getIdzakaznik().getIdzakaznik());
+        if (zakaznikOpt.isPresent()) {
+            Zakaznik zakaznik = zakaznikOpt.get();
+            String userEmail = zakaznik.getMail();
+            String subject = "Lístky pro objednávku: " + order.getId();
+            String bodyText = "Dobrý den " + zakaznik.getJmeno() + ",\n\n"
+                    + "Děkujeme za zakoupení lístků. Lístky můžete najít v příloze.\n\n"
+                    + "Naviděnou,\n"
+                    + "Vaše Oktávy";
 
-            if (zakaznikOpt.isPresent()) {
-                Zakaznik zakaznik = zakaznikOpt.get();
-                // Lazy load problematic property may be fully initialized here
-                zakaznik.getIdzakaznik(); // Force load if necessary
+            // Create the MimeMessage
+            MimeMessage message = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-                String userEmail = zakaznik.getMail();
-                String subject = "Lístky pro objednávku: " + order.getId();
-                String bodyText = "Dobrý den " + zakaznik.getJmeno() + ",\n\n"
-                        + "Děkujeme za zakoupení lístků. Lístky můžete najít v příloze.\n\n"
-                        + "Naviděnou,\n"
-                        + "Vaše Oktávy";
+            // Set the email details
+            helper.setFrom(username); // Use your email address
+            helper.setTo(userEmail);
+            helper.setSubject(subject);
+            helper.setText(bodyText);
 
-                MimeMessage message = emailSender.createMimeMessage();
-                MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            // Generate the ticket file
+            File ticketFile = generateTicketFile(order);
+            FileSystemResource file = new FileSystemResource(ticketFile);
+            helper.addAttachment("Ticket_" + order.getId() + ".pdf", file);
 
-                helper.setFrom(username);
-                helper.setTo(userEmail);
-                helper.setSubject(subject);
-                helper.setText(bodyText);
-
-                File ticketFile = generateTicketFile(order);
-                FileSystemResource file = new FileSystemResource(ticketFile);
-                helper.addAttachment("Ticket_" + order.getId() + ".pdf", file);
-
-                emailSender.send(message);
-                System.out.println("Tickets sent to " + userEmail + " for order ID: " + order.getId());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Failed to send ticket email for order ID: " + order.getId());
+            // Send the email
+            emailSender.send(message);
+            System.out.println("Tickets sent to " + userEmail + " for order ID: " + order.getId());
+        } else {
+            System.out.println("Zakaznik not found for order ID: " + order.getId());
         }
+    } catch (MessagingException e) {
+        e.printStackTrace();
+        System.out.println("Failed to send ticket email for order ID: " + order.getId() + " due to messaging error: " + e.getMessage());
+    } catch (IOException e) {
+        e.printStackTrace();
+        System.out.println("Failed to generate or send ticket for order ID: " + order.getId() + " due to IO error: " + e.getMessage());
+    } catch (Exception e) {
+        e.printStackTrace();
+        System.out.println("An unexpected error occurred while sending ticket email for order ID: " + order.getId());
     }
-
+}
+//-----------------------------------------------------------------------------------
     public File generateTicketFile(Objednavka order) throws IOException {
         File tempFile = File.createTempFile("Ticket_" + order.getId(), ".pdf");
 
@@ -270,7 +282,7 @@ public class EmailCheckerService {
 
         return filePath;
     }
-
+//-----------------------------------------------------------------------------------
     private String getTextFromMessage(Message message) throws IOException, MessagingException {
         if (message.isMimeType("text/plain")) {
             return message.getContent().toString();
