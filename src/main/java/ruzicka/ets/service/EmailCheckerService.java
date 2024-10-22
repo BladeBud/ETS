@@ -13,15 +13,12 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ruzicka.ets.db.Zakaznik;
 import ruzicka.ets.db.Objednavka;
 import ruzicka.ets.repository.ObjednavkaRepository;
@@ -43,9 +40,6 @@ import java.util.regex.Pattern;
 public class EmailCheckerService {
 //----------------------------------------------------------------------------------
     private static final String HOST = "imap.seznam.cz";
-//    @Value("${spring.mail.host}")
-//    private String HOST;
-
     @Value("${email.username}")
     private String username;
 
