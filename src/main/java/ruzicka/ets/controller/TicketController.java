@@ -2,11 +2,16 @@ package ruzicka.ets.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import ruzicka.ets.db.Zakaznik;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ruzicka.ets.db.Objednavka;
-import ruzicka.ets.repository.ZakaznikRepository;
+import ruzicka.ets.db.Zakaznik;
 import ruzicka.ets.repository.ObjednavkaRepository;
+import ruzicka.ets.repository.ZakaznikRepository;
 import ruzicka.ets.service.EmailVerificationService;
 
 import java.util.List;

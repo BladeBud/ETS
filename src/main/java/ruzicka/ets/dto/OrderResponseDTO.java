@@ -7,9 +7,9 @@ package ruzicka.ets.dto;
  */
 public class OrderResponseDTO {
 //----------------------------------------------------------------------------------------------------------------------
-    private Integer idzak;
-    private Integer cena;
-    private String cisloBankovnihoUctu;
+    private final Integer idzak;
+    private final Integer cena;
+    private final String cisloBankovnihoUctu;
 //----------------------------------------------------------------------------------------------------------------------
     // Constructor
     public OrderResponseDTO(Integer idzak, Integer cena, String cisloBankovnihoUctu) {

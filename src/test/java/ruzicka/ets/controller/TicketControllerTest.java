@@ -6,10 +6,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
-import ruzicka.ets.db.Zakaznik;
 import ruzicka.ets.db.Objednavka;
-import ruzicka.ets.repository.ZakaznikRepository;
+import ruzicka.ets.db.Zakaznik;
 import ruzicka.ets.repository.ObjednavkaRepository;
+import ruzicka.ets.repository.ZakaznikRepository;
 import ruzicka.ets.service.EmailVerificationService;
 
 import java.util.Collections;
@@ -17,7 +17,10 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class TicketControllerTest {
 

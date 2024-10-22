@@ -33,7 +33,7 @@ public class SqlFillerMisto {
         }
 
         // Output the generated SQL
-        System.out.println(sql.toString());
+        System.out.println(sql);
     }
 
     // Helper method to generate the SQL insert statement

@@ -10,13 +10,15 @@ import org.springframework.mail.javamail.JavaMailSender;
 import ruzicka.ets.db.Zakaznik;
 import ruzicka.ets.repository.ZakaznikRepository;
 
-import java.sql.Timestamp;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class EmailVerificationServiceTest {
 

@@ -12,14 +12,13 @@ import ruzicka.ets.db.Typmista;
 import ruzicka.ets.db.misto;
 import ruzicka.ets.repository.MistoRepository;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 public class OrderControllerTest {
@@ -47,7 +46,7 @@ public class OrderControllerTest {
         mistoEntity.setAvailableQuantity(10);
         mistoEntity.setIdtypmista(typMista); // Set the TypMista object
 
-        List<misto> mistoList = Arrays.asList(mistoEntity);
+        List<misto> mistoList = List.of(mistoEntity);
 
         // Mock repository behavior
         when(mistoRepository.findByAdresaAndAvailableQuantity(any(Integer.class), any(Integer.class)))
