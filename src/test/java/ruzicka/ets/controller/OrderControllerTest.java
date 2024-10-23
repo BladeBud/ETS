@@ -49,13 +49,14 @@ public class OrderControllerTest {
         List<misto> mistoList = List.of(mistoEntity);
 
         // Mock repository behavior
-        when(mistoRepository.findByAdresaAndAvailableQuantity(any(Integer.class), any(Integer.class)))
+        when(mistoRepository.findAll())
+
                 .thenReturn(mistoList);
 
         // Perform the GET request and validate the response
         mockMvc.perform(get("/misto")
                         .param("adresa", "1")
-                        .param("avaiableQuantity", "10"))
+                       )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].adresa").value(1))
                 .andExpect(jsonPath("$[0].avaiablequantity").value(10))

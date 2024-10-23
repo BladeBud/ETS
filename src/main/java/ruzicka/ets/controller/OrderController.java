@@ -44,16 +44,22 @@ public class OrderController {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-    /**
-     * Retrieves a list of event information based on the given address and available quantity.
-     *
-     * @param adresa           the address identifier to filter the events
-     * @param avaiableQuantity the number of available quantities to filter the events
-     * @return a list of {@code EventInfoDTO} objects containing the event information
-     */
+
+//    @GetMapping("/misto")
+//    public List<EventInfoDTO> getEventInfo(@RequestParam Integer adresa, @RequestParam Integer avaiableQuantity) {
+//        List<misto> mistoList = mistoRepository.findByAdresaAndAvailableQuantity(adresa, avaiableQuantity);
+//        return mistoList.stream().map(misto -> {
+//            EventInfoDTO response = new EventInfoDTO();
+//            response.setAdresa(misto.getAdresa());
+//            response.setAvaiablequantity(misto.getAvailableQuantity());
+//            //response.setIdzakaznik(objednavka.getIdzakaznik());
+//            response.setCena(misto.getIdtypmista().getCena());
+//            return response;
+//        }).collect(Collectors.toList());
+//    }
     @GetMapping("/misto")
-    public List<EventInfoDTO> getEventInfo(@RequestParam Integer adresa, @RequestParam Integer avaiableQuantity) {
-        List<misto> mistoList = mistoRepository.findByAdresaAndAvailableQuantity(adresa, avaiableQuantity);
+    public List<EventInfoDTO> getEventInfo(@RequestParam Integer adresa) {
+        List<misto> mistoList = mistoRepository.findAll();
         return mistoList.stream().map(misto -> {
             EventInfoDTO response = new EventInfoDTO();
             response.setAdresa(misto.getAdresa());
@@ -89,15 +95,7 @@ public class OrderController {
     }
 //----------------------------------------------------------------------------------------------------------------------
 
-    /**
-     * Creates an order based on the given {@code OrderRequestDTO} object.
-     * If the order is successfully created, returns an {@code OrderResponseDTO}.
-     * Otherwise, returns a {@code BAD_REQUEST} status.
-     *
-     * @param orderRequestDTO the data transfer object containing the details of the order to be created
-     * @return a {@code ResponseEntity} containing an {@code OrderResponseDTO} if the order was successfully created, or a {@code BAD_REQUEST} status if the order creation failed
-     *
-     */
+
     @PostMapping("/order")
     public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
         Objednavka objednavka = objednavkaService.createOrder(orderRequestDTO);
