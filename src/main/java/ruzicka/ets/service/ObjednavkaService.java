@@ -60,7 +60,7 @@ public class ObjednavkaService {
         }
     }
 
-    // Create order
+    // Create order with mixed 'misto' types and update available quantity
     public Objednavka createOrder(OrderRequestDTO orderRequest) {
         log.info("Attempting to create order for address: {} and quantity: {}", orderRequest.getAdresa(), orderRequest.getQuantity());
 
@@ -70,10 +70,42 @@ public class ObjednavkaService {
             return null;
         }
 
-        // Check if the requested quantity is available
-        List<misto> availableMisto = mistoRepository.findByAdresaAndAvailableQuantity(orderRequest.getAdresa(), orderRequest.getQuantity());
-        if (availableMisto.isEmpty()) {
+        // Fetch available 'misto' for the provided address
+        List<misto> availableMistoList = mistoRepository.findByAdresaAndAvailableQuantity(orderRequest.getAdresa(), orderRequest.getQuantity());
+        if (availableMistoList.isEmpty()) {
             log.warn("No available quantity for address: {} with requested quantity: {}", orderRequest.getAdresa(), orderRequest.getQuantity());
+            return null;
+        }
+
+        int totalOrderedQuantity = orderRequest.getQuantity();
+        int totalPrice = 0;
+        int remainingQuantityToFulfill = totalOrderedQuantity;
+
+        for (misto availableMisto : availableMistoList) {
+            int unitPrice = calculatePriceByType(availableMisto.getIdtypmista().getTypMista());
+            int availableQuantity = availableMisto.getAvailableQuantity();
+
+            if (remainingQuantityToFulfill <= 0) {
+                break;
+            }
+
+            // Calculate the quantity that can be used from this 'misto'
+            int quantityToUse = Math.min(availableQuantity, remainingQuantityToFulfill);
+
+            // Calculate the price for this portion and add it to the total price
+            totalPrice += unitPrice * quantityToUse;
+
+            // Update the remaining quantity that needs to be fulfilled
+            remainingQuantityToFulfill -= quantityToUse;
+
+            // Update the available quantity for this 'misto'
+            availableMisto.setAvailableQuantity(availableQuantity - quantityToUse);
+            mistoRepository.save(availableMisto);
+        }
+
+        // If we haven't fulfilled the total ordered quantity, the order cannot be placed
+        if (remainingQuantityToFulfill > 0) {
+            log.warn("Not enough available quantity for address: {}. Requested: {}, Available: {}", orderRequest.getAdresa(), totalOrderedQuantity, totalOrderedQuantity - remainingQuantityToFulfill);
             return null;
         }
 
@@ -82,8 +114,9 @@ public class ObjednavkaService {
         Zakaznik zakaznik = new Zakaznik();
         zakaznik.setIdzakaznik(orderRequest.getZakaznikId());
         objednavka.setIdzakaznik(zakaznik);
-        objednavka.setIdmisto(availableMisto.get(0));
-        objednavka.setQuantity(orderRequest.getQuantity());
+        objednavka.setIdmisto(availableMistoList.get(0)); // Assume we assign the first `misto` for now
+        objednavka.setQuantity(totalOrderedQuantity);
+        objednavka.setCena(totalPrice);  // Set the computed total price
         objednavka.setDatumcas(Instant.now());
         objednavka.setStatus("R");
 
@@ -91,6 +124,23 @@ public class ObjednavkaService {
         log.info("Order successfully saved with ID: {}", savedOrder.getId());
 
         return savedOrder;
+    }
+
+    // Price calculation based on the 'typmista'
+    private int calculatePriceByType(String typmista) {
+        switch (typmista) {
+            case "L":
+                return 3000;  // Price for 'L' type
+            case "B":
+                return 1000;  // Price for 'B' type
+            case "V":
+                return 1500;  // Price for 'V' type
+            case "S":
+                return 100;   // Price for 'S' type
+            default:
+                log.warn("Unknown 'typmista': {}. Defaulting to 0.", typmista);
+                return 0;  // Default to 0 in case of unknown type
+        }
     }
 
     // Check if the address is already reserved
