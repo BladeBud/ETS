@@ -19,7 +19,7 @@ public class OrderResponseDTO {
     }
 //----------------------------------------------------------------------------------------------------------------------
     // Getters
-    public Integer getIdzak() {
+    public Integer getIdobjednavka() {
         return idobjednavka;
     }
 
