@@ -101,7 +101,7 @@ public class OrderController {
         Objednavka objednavka = objednavkaService.createOrder(orderRequestDTO);
         if (objednavka != null) {
             OrderResponseDTO response = new OrderResponseDTO(
-                    objednavka.getIdzakaznik().getIdzakaznik(),
+                    objednavka.getId(),
                     objednavka.getIdmisto().getIdtypmista().getCena(),
                     cisloUctu
             );

@@ -7,20 +7,20 @@ package ruzicka.ets.dto;
  */
 public class OrderResponseDTO {
 //----------------------------------------------------------------------------------------------------------------------
-    private final Integer idzak;
+    private final Integer idobjednavka;
     private final Integer cena;
     private final String cisloBankovnihoUctu;
 //----------------------------------------------------------------------------------------------------------------------
     // Constructor
-    public OrderResponseDTO(Integer idzak, Integer cena, String cisloBankovnihoUctu) {
-        this.idzak = idzak;
+    public OrderResponseDTO(Integer idobjednavka, Integer cena, String cisloBankovnihoUctu) {
+        this.idobjednavka = idobjednavka;
         this.cena = cena;
         this.cisloBankovnihoUctu = cisloBankovnihoUctu;
     }
 //----------------------------------------------------------------------------------------------------------------------
     // Getters
     public Integer getIdzak() {
-        return idzak;
+        return idobjednavka;
     }
 
     public Integer getCena() {

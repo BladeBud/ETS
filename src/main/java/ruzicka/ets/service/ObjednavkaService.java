@@ -137,16 +137,17 @@ public class ObjednavkaService {
     }
 
     // Price calculation based on the 'typmista'
+    //TODO: should not be hardcoded, should be fetched from a configuration or database
     private int calculatePriceByType(String typmista) {
         switch (typmista) {
             case "L":
-                return 3000;  // Price for 'L' type
+                return 700;  // Price for 'L' type
             case "B":
-                return 1000;  // Price for 'B' type
+                return 500;  // Price for 'B' type
             case "V":
-                return 1500;  // Price for 'V' type
+                return 600;  // Price for 'V' type
             case "S":
-                return 100;   // Price for 'S' type
+                return 300;   // Price for 'S' type
             default:
                 log.warn("Unknown 'typmista': {}. Defaulting to 0.", typmista);
                 return 0;  // Default to 0 in case of unknown type

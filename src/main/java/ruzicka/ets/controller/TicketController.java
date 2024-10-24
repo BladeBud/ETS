@@ -67,7 +67,7 @@ public class TicketController {
             zakaznikRepository.save(newUser);
 
             // Send verification email with Zakaznik ID
-            emailService.sendVerificationEmail(newUser, "Verify your email", "Please verify your email address.");
+            emailService.sendVerificationEmail(newUser, "Ověření mailu Ples", "Prosím ověřte svůj mail.");
 
             return ResponseEntity.ok("Verification email sent.");
         }

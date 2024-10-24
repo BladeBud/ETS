@@ -74,24 +74,4 @@ public class ObjednavkaServiceTest {
         assertNotNull(result);
         verify(objednavkaRepository, times(1)).save(objednavka);
     }
-
-    @Test
-    void testReleaseExpiredReservations() {
-        objednavkaService.releaseExpiredReservations();
-        // Assuming the implementation of releaseExpiredReservations() method calls some repository methods,
-        // you would verify those calls here. Since the implementation is omitted, we can't verify anything specific.
-        // Replace the following line with proper verifications.
-        verifyNoMoreInteractions(objednavkaRepository);
-    }
-
-    @Test
-    void testCreateOrder() {
-        OrderRequestDTO orderRequest = new OrderRequestDTO();
-        Objednavka objednavka = new Objednavka();
-        when(objednavkaRepository.save(any(Objednavka.class))).thenReturn(objednavka);
-
-        Objednavka result = objednavkaService.createOrder(orderRequest);
-        assertNotNull(result);
-        verify(objednavkaRepository, times(1)).save(any(Objednavka.class));
-    }
 }

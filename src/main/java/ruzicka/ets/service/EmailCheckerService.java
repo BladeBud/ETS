@@ -250,15 +250,15 @@ private void sendTicketEmail(Objednavka order) {
                 contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);
                 contentStream.beginText();
                 contentStream.newLineAtOffset(50, 750);
-                contentStream.showText("Customer Name: " + order.getIdzakaznik().getJmeno());
+                contentStream.showText("Jméno: " + order.getIdzakaznik().getJmeno());
                 contentStream.endText();
 
                 contentStream.beginText();
                 contentStream.newLineAtOffset(50, 730);
-                contentStream.showText("Address: " + order.getIdmisto().getAdresa());
+                contentStream.showText("Místo: " + order.getIdmisto().getAdresa());
                 contentStream.endText();
 
-                String qrCodeData = "Order ID: " + order.getId() + ", Customer Name: " + order.getIdzakaznik().getJmeno();
+                String qrCodeData = "Id objednávky: " + order.getId() + ", Jméno: " + order.getIdzakaznik().getJmeno();
                 String qrCodeFilePath = generateQRCodeImage(qrCodeData, 150, 150);
 
                 BufferedImage qrImage = ImageIO.read(new File(qrCodeFilePath));
