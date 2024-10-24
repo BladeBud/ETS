@@ -52,11 +52,21 @@ public class ObjednavkaService {
     // Release expired reservations
     public void releaseExpiredReservations() {
         Instant tenMinutesAgo = Instant.now().minus(10, ChronoUnit.MINUTES);
-        List<Objednavka> expiredReservations = objednavkaRepository.findByDatumcasBeforeAndStatus(tenMinutesAgo, "R");
-        for (Objednavka objednavka : expiredReservations) {
-            log.info("Releasing expired order: {}", objednavka);
+        List<Objednavka> expiredOrders = objednavkaRepository.findByDatumcasBeforeAndStatus(tenMinutesAgo, "R");
+
+        for (Objednavka objednavka : expiredOrders) {
+            misto relatedMisto = objednavka.getIdmisto();
+
+            // Mark the order as expired
             objednavka.setStatus("E");
             objednavkaRepository.save(objednavka);
+
+            // Restore the available quantity
+            int quantityToRestore = objednavka.getQuantity();
+            relatedMisto.setAvailableQuantity(relatedMisto.getAvailableQuantity() + quantityToRestore);
+            mistoRepository.save(relatedMisto);
+
+            log.info("Order with ID {} set to expired and quantity {} restored to misto", objednavka.getId(), quantityToRestore);
         }
     }
 

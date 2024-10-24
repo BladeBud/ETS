@@ -89,7 +89,7 @@ public class OrderController {
      *
      * The method is scheduled to run every 10 minutes.
      */
-    @Scheduled(fixedRate = 600000) // TODO: Run every 10 minutes (domluvit se na nacasovani pokus se bude upravovat uparvit i v releaseexpiredreservations)
+    @Scheduled(fixedRate = 60000) // TODO: Run every 10 minutes (domluvit se na nacasovani pokus se bude upravovat uparvit i v releaseexpiredreservations)
     public void cleanupExpiredReservations() {
         objednavkaService.releaseExpiredReservations();
     }
