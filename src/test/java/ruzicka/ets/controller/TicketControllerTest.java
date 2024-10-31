@@ -12,17 +12,15 @@ import ruzicka.ets.repository.ObjednavkaRepository;
 import ruzicka.ets.repository.ZakaznikRepository;
 import ruzicka.ets.service.EmailVerificationService;
 
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-class TicketControllerTest {
+public class TicketControllerTest {
 
     @Mock
     private ZakaznikRepository zakaznikRepository;
@@ -37,51 +35,87 @@ class TicketControllerTest {
     private TicketController ticketController;
 
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    void testLoginOrRegister_ExistingVerifiedUser() {
+    public void testLoginOrRegister_userVerified() {
         String email = "verified@example.com";
         Zakaznik user = new Zakaznik();
         user.setMail(email);
         user.setStatus("V");
+        user.setIdzakaznik(1);
+
+        List<Objednavka> orders = Arrays.asList(new Objednavka());
+
         when(zakaznikRepository.findByMail(email)).thenReturn(Optional.of(user));
-        when(objednavkaRepository.findByIdzakaznik_Idzakaznik(user.getIdzakaznik()))
-                .thenReturn(Collections.singletonList(new Objednavka()));
+        when(objednavkaRepository.findByIdzakaznik_Idzakaznik(user.getIdzakaznik())).thenReturn(orders);
 
         ResponseEntity<?> response = ticketController.loginOrRegister(email);
 
-        assertEquals(200, response.getStatusCodeValue());
         verify(zakaznikRepository, times(1)).findByMail(email);
         verify(objednavkaRepository, times(1)).findByIdzakaznik_Idzakaznik(user.getIdzakaznik());
+        assertEquals(ResponseEntity.ok(orders), response);
     }
 
     @Test
-    void testLoginOrRegister_ExistingUnverifiedUser() {
-        String email = "pending@example.com";
+    public void testLoginOrRegister_userNotVerified() {
+        String email = "unverified@example.com";
         Zakaznik user = new Zakaznik();
         user.setMail(email);
         user.setStatus("P");
+
         when(zakaznikRepository.findByMail(email)).thenReturn(Optional.of(user));
 
         ResponseEntity<?> response = ticketController.loginOrRegister(email);
 
-        assertEquals(403, response.getStatusCodeValue());
         verify(zakaznikRepository, times(1)).findByMail(email);
+        verify(objednavkaRepository, never()).findByIdzakaznik_Idzakaznik(anyInt());
+        assertEquals(ResponseEntity.status(403).body("Please verify your email."), response);
     }
 
     @Test
-    void testLoginOrRegister_NewUser() {
+    public void testLoginOrRegister_newUser() {
         String email = "newuser@example.com";
+        Zakaznik newUser = new Zakaznik();
+        newUser.setMail(email);
+        newUser.setStatus("P");
+
         when(zakaznikRepository.findByMail(email)).thenReturn(Optional.empty());
+        when(zakaznikRepository.save(any(Zakaznik.class))).thenReturn(newUser);
 
         ResponseEntity<?> response = ticketController.loginOrRegister(email);
 
-        assertEquals(200, response.getStatusCodeValue());
         verify(zakaznikRepository, times(1)).findByMail(email);
         verify(zakaznikRepository, times(1)).save(any(Zakaznik.class));
-        verify(emailService, times(1)).sendVerificationEmail(any(Zakaznik.class), eq("Verify your email"), eq("Please verify your email address."));
+        verify(emailService, times(1)).sendVerificationEmail(any(Zakaznik.class), eq("Ověření mailu Ples"), eq("Prosím ověřte svůj mail."));
+        assertEquals(ResponseEntity.ok("Verification email sent."), response);
+    }
+
+    @Test
+    public void testVerifyEmail_success() {
+        String email = "verify@example.com";
+        Integer id = 1;
+
+        when(emailService.verifyEmail(email, id)).thenReturn(true);
+
+        ResponseEntity<String> response = ticketController.verifyEmail(email, id);
+
+        verify(emailService, times(1)).verifyEmail(email, id);
+        assertEquals(ResponseEntity.ok("Email verified successfully."), response);
+    }
+
+    @Test
+    public void testVerifyEmail_fail() {
+        String email = "verify@example.com";
+        Integer id = 1;
+
+        when(emailService.verifyEmail(email, id)).thenReturn(false);
+
+        ResponseEntity<String> response = ticketController.verifyEmail(email, id);
+
+        verify(emailService, times(1)).verifyEmail(email, id);
+        assertEquals(ResponseEntity.status(404).body("Email verification failed. Invalid ID or email."), response);
     }
 }
