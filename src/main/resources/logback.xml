@@ -9,7 +9,7 @@
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
 
-        <file> app.log</file>
+        <file>/srv/TomcatA/logs/ETS.log</file>
 
         <encoder>
 
