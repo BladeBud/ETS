@@ -17,7 +17,7 @@ import java.util.List;
 
 @Service
 public class ObjednavkaService {
-
+//---------------------------------------------------------------------------------------------------
     private static final Logger log = LoggerFactory.getLogger(ObjednavkaService.class);
 
     @Autowired
@@ -25,22 +25,22 @@ public class ObjednavkaService {
 
     @Autowired
     private MistoRepository mistoRepository;
-
+//---------------------------------------------------------------------------------------------------
     // Find orders by zakaznikId
     public List<Objednavka> findOrdersByZakaznikId(Integer zakaznikId) {
         return objednavkaRepository.findByIdzakaznik_Idzakaznik(zakaznikId);
     }
-
+//---------------------------------------------------------------------------------------------------
     // Find order by orderId
     public Objednavka findOrderById(Integer orderId) {
         return objednavkaRepository.findById(orderId).orElse(null);
     }
-
+//---------------------------------------------------------------------------------------------------
     // Save an order
     public Objednavka save(Objednavka objednavka) {
         return objednavkaRepository.save(objednavka);
     }
-
+//---------------------------------------------------------------------------------------------------
     // Reserve an order
     public Objednavka reserveOrder(Objednavka objednavka) {
         log.info("Reserving order: {}", objednavka);
@@ -48,7 +48,7 @@ public class ObjednavkaService {
         objednavka.setStatus("R");
         return objednavkaRepository.save(objednavka);
     }
-
+//---------------------------------------------------------------------------------------------------
     // Release expired reservations
     public void releaseExpiredReservations() {
         Instant tenMinutesAgo = Instant.now().minus(10, ChronoUnit.MINUTES);
@@ -69,7 +69,7 @@ public class ObjednavkaService {
             log.info("Order with ID {} set to expired and quantity {} restored to misto", objednavka.getId(), quantityToRestore);
         }
     }
-
+//---------------------------------------------------------------------------------------------------
     // Create order with mixed 'misto' types and update available quantity
     public Objednavka createOrder(OrderRequestDTO orderRequest) {
         log.info("Attempting to create order for address: {} and quantity: {}", orderRequest.getAdresa(), orderRequest.getQuantity());
@@ -135,7 +135,7 @@ public class ObjednavkaService {
 
         return savedOrder;
     }
-
+//---------------------------------------------------------------------------------------------------
     // Price calculation based on the 'typmista'
     //TODO: should not be hardcoded, should be fetched from a configuration or database
     private int calculatePriceByType(String typmista) {
@@ -153,7 +153,7 @@ public class ObjednavkaService {
                 return 0;  // Default to 0 in case of unknown type
         }
     }
-
+//---------------------------------------------------------------------------------------------------
     // Check if the address is already reserved
     private boolean isAddressReserved(Integer adresa) {
         List<Objednavka> reservedOrders = objednavkaRepository.findByIdmisto_AdresaAndStatus(adresa, "R");

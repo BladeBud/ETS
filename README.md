@@ -21,12 +21,10 @@ Bash
 cd event-ticket-system
 npm install
 
-Při použití kódu buďte obezřetní.
 Configure environment variables: Create a .env file and add necessary environment variables, such as:
 
-DATABASE_URL=mongodb://localhost:27017/event-tickets
-EMAIL_SERVICE_API_KEY=your_api_key
-or add in application.properties your own mail
+DATABASE_URL=
+add in application.properties your own mail
 
 Run the development server:
 Bash

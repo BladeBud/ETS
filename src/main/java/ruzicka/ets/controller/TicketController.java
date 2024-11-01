@@ -13,14 +13,11 @@ import ruzicka.ets.db.Zakaznik;
 import ruzicka.ets.repository.ObjednavkaRepository;
 import ruzicka.ets.repository.ZakaznikRepository;
 import ruzicka.ets.service.EmailVerificationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
-
-/**
- * @author czech
- * @since 2023-10-03
- */
 
 /**
  * REST controller for managing customers' ticket-related operations.
@@ -29,6 +26,8 @@ import java.util.Optional;
 @RequestMapping("/api/tickets")
 public class TicketController {
 //----------------------------------------------------------------------------------------------------------------------
+    private static final Logger logger = LoggerFactory.getLogger(TicketController.class);
+
     @Autowired
     private ZakaznikRepository zakaznikRepository;
 
@@ -50,30 +49,39 @@ public class TicketController {
      */
     @PostMapping("/login-register")
     public ResponseEntity<?> loginOrRegister(@RequestBody String email) {
+        logger.info("loginOrRegister called with email: {}", email);
+
         Optional<Zakaznik> existingUser = zakaznikRepository.findByMail(email);
 
         if (existingUser.isPresent()) {
             Zakaznik user = existingUser.get();
+            logger.info("User found with email: {}", email);
+
             if ("V".equals(user.getStatus())) { // Verified
+                logger.info("User is verified");
                 List<Objednavka> orders = objednavkaRepository.findByIdzakaznik_Idzakaznik(user.getIdzakaznik());
+                logger.info("Returning user orders: {}", orders);
                 return ResponseEntity.ok(orders);
             } else {
+                logger.warn("User email is not verified");
                 return ResponseEntity.status(403).body("Please verify your email.");
             }
         } else {
+            logger.info("No user found with email: {}. Creating new user.", email);
             Zakaznik newUser = new Zakaznik();
             newUser.setMail(email);
             newUser.setStatus("P"); // Pending verification
             zakaznikRepository.save(newUser);
+            logger.info("New user created and saved with email: {}", email);
 
             // Send verification email with Zakaznik ID
             emailService.sendVerificationEmail(newUser, "Ověření mailu Ples", "Prosím ověřte svůj mail.");
+            logger.info("Verification email sent to: {}", email);
 
             return ResponseEntity.ok("Verification email sent.");
         }
     }
 //----------------------------------------------------------------------------------------------------------------------
-
     /**
      * Endpoint to verify a customer's email address based on the provided email and ID.
      *
@@ -84,13 +92,15 @@ public class TicketController {
      */
     @GetMapping("/verify-email")
     public ResponseEntity<String> verifyEmail(@RequestParam String email, @RequestParam Integer id) {
+        logger.info("verifyEmail called with email: {} and id: {}", email, id);
         boolean verified = emailService.verifyEmail(email, id);
 
         if (verified) {
+            logger.info("Email verified successfully for email: {}", email);
             return ResponseEntity.ok("Email verified successfully.");
         } else {
+            logger.warn("Email verification failed for email: {}. Invalid ID or email.", email);
             return ResponseEntity.status(404).body("Email verification failed. Invalid ID or email.");
         }
     }
 }
-

@@ -49,7 +49,7 @@ public class EmailVerificationService {
         message.setSubject(subject);
         message.setText(messageContent + "\n\n" +
                 "Prosím klikněte na tento odkaz pro potvrzení mailu: " + //TODO: zmeit zneni mailu
-                "http://localhost:8080/api/tickets/verify-email?email=" + zakaznik.getMail() + "&id=" + zakaznikId); //TODO: Change to production URL
+                "https://plesgymjh.me/api/tickets/verify-email?email=" + zakaznik.getMail() + "&id=" + zakaznikId); //TODO: Change to production URL
 
         emailSender.send(message);
         log.info("Verification email sent to {}", zakaznik.getMail());
