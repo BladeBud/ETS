@@ -22,6 +22,7 @@
     </appender>
     <root level="INFO">
         <appender-ref ref="FILE" />
+        <appender-ref ref="FILE2" />
     </root>
 
     <logger name="ruzicka.ets"         level="DEBUG" />
