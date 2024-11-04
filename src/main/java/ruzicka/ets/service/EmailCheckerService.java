@@ -20,6 +20,8 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -45,8 +47,10 @@ import java.util.regex.Pattern;
 
 @Service
 public class EmailCheckerService {
-//----------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------------
+    private static final Logger log = LoggerFactory.getLogger(EmailCheckerService.class);
     private static final String HOST = "imap.seznam.cz";
+
     @Value("${email.username}")
     private String username;
 
@@ -61,7 +65,7 @@ public class EmailCheckerService {
 
     @Autowired
     private JavaMailSender emailSender;
-//-----------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     @PostConstruct
     public void init() {
         startEmailCheckingService();
@@ -70,23 +74,23 @@ public class EmailCheckerService {
     public void startEmailCheckingService() {
         new Thread(this::checkEmailLoop).start();
     }
-//-----------------------------------------------------------------------------------
+
     private void checkEmailLoop() {
-        System.out.println("Starting email checking loop...");
+        log.info("Starting email checking loop...");
         while (true) {
             try {
-                System.out.println("Checking for new emails...");
+                log.info("Checking for new emails...");
                 checkForNewEmails();
-                System.out.println("Sleeping for 60 seconds before next check...");
+                log.info("Sleeping for 60 seconds before next check...");
                 Thread.sleep(60000); // Check every 60 seconds
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("Error in email checking loop", e);
             }
         }
     }
-//-----------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     private void checkForNewEmails() throws MessagingException, IOException {
-        System.out.println("Connecting to the email server...");
+        log.info("Connecting to the email server...");
 
         Properties properties = new Properties();
         properties.put("mail.store.protocol", "imaps");
@@ -99,74 +103,72 @@ public class EmailCheckerService {
         inbox.open(Folder.READ_WRITE);
 
         Message[] messages = inbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
-        System.out.println("Found " + messages.length + " unread emails.");
+        log.info("Found {} unread emails.", messages.length);
 
         for (Message message : messages) {
-            System.out.println("Processing email from: " + message.getFrom()[0].toString());
+            log.info("Processing email from: {}", message.getFrom()[0].toString());
 
             if (isBankEmail(message)) {
-                System.out.println("Email is from the bank. Extracting content...");
+                log.info("Email is from the bank. Extracting content...");
 
                 String content = getTextFromMessage(message);
-                System.out.println("Email content extracted: " + content);
+                log.info("Email content extracted: {}", content);
 
                 String variableSymbol = extractVariableSymbol(content);
                 double amount = extractAmount(content);
 
-                System.out.println("Extracted variable symbol: " + variableSymbol);
-                System.out.println("Extracted amount: " + amount);
+                log.info("Extracted variable symbol: {}", variableSymbol);
+                log.info("Extracted amount: {}", amount);
 
                 if (variableSymbol != null && amount > 0 && validateAndProcessPayment(variableSymbol, amount)) {
-                    System.out.println("Payment verified for order with symbol: " + variableSymbol);
+                    log.info("Payment verified for order with symbol: {}", variableSymbol);
                 } else {
-                    System.out.println("Payment validation failed for email.");
+                    log.warn("Payment validation failed for email.");
                 }
 
                 message.setFlag(Flags.Flag.SEEN, true);
-                System.out.println("Email marked as read.");
+                log.info("Email marked as read.");
             } else {
-                System.out.println("Email is not from the bank. Skipping.");
+                log.info("Email is not from the bank. Skipping.");
             }
         }
 
         inbox.close(false);
         store.close();
-        System.out.println("Disconnected from the email server.");
+        log.info("Disconnected from the email server.");
     }
-//-----------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     private boolean isBankEmail(Message message) throws MessagingException {
         boolean isFromBank = message.getFrom()[0].toString().contains("automat@fio.cz");
-        System.out.println("Checking if email is from the bank: " + isFromBank);
+        log.info("Checking if email is from the bank: {}", isFromBank);
         return isFromBank;
     }
-
+//----------------------------------------------------------------------------------------------------------------------
     private String extractVariableSymbol(String content) {
-
         Pattern pattern = Pattern.compile("VS:\\s*(\\d+)");
         Matcher matcher = pattern.matcher(content);
 
         if (matcher.find()) {
-            return matcher.group(1).trim(); // Vrátí nalezený VS
+            return matcher.group(1).trim();
         }
-        return null; // Pokud VS nenajde, vrátíme null
+        return null;
     }
-
+//----------------------------------------------------------------------------------------------------------------------
     private double extractAmount(String content) {
         try {
-            // Použije regulární výraz k nalezení částky ve formátu X,XX
-            Pattern pattern = Pattern.compile("Částka:\\s*([\\d,]+)");
+            Pattern pattern = Pattern.compile("Částka:\\s*([\\d\\s,]+)");
             Matcher matcher = pattern.matcher(content);
 
             if (matcher.find()) {
-                String amountStr = matcher.group(1).replace(",", "."); // Nahrazení čárky tečkou pro parsování
+                String amountStr = matcher.group(1).replace(" ", "").replace(",", ".");
                 return Double.parseDouble(amountStr.trim());
             }
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            log.error("Error parsing amount", e);
         }
-        return 0.0; // Pokud se nepodaří částku najít nebo převést, vrát 0
+        return 0.0;
     }
-//-----------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     private boolean validateAndProcessPayment(String variableSymbol, double amount) {
         try {
             Optional<Objednavka> orderOpt = objednavkaRepository.findById(Integer.parseInt(variableSymbol));
@@ -175,70 +177,62 @@ public class EmailCheckerService {
                 Objednavka order = orderOpt.get();
 
                 if (order.getCena() == amount) {
-                    order.setStatus("P"); // Payment processed
+                    order.setStatus("P");
                     objednavkaRepository.save(order);
 
                     sendTicketEmail(order);
                     return true;
                 } else {
-                    System.out.println("Amount mismatch for order: " + variableSymbol);
+                    log.warn("Amount mismatch for order: {}", variableSymbol);
                 }
             } else {
-                System.out.println("No matching order found for symbol: " + variableSymbol);
+                log.warn("No matching order found for symbol: {}", variableSymbol);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error validating and processing payment", e);
         }
         return false;
     }
+//----------------------------------------------------------------------------------------------------------------------
+    private void sendTicketEmail(Objednavka order) {
+        try {
+            Optional<Zakaznik> zakaznikOpt = zakaznikRepository.findById(order.getIdzakaznik().getIdzakaznik());
 
-//-----------------------------------------------------------------------------------
-private void sendTicketEmail(Objednavka order) {
-    try {
-        Optional<Zakaznik> zakaznikOpt = zakaznikRepository.findById(order.getIdzakaznik().getIdzakaznik());
+            if (zakaznikOpt.isPresent()) {
+                Zakaznik zakaznik = zakaznikOpt.get();
+                String userEmail = zakaznik.getMail();
+                String subject = "Lístky pro objednávku: " + order.getId();
+                String bodyText = "Dobrý den " + zakaznik.getJmeno() + ",\n\n"
+                        + "Děkujeme za zakoupení lístků. Lístky můžete najít v příloze.\n\n"
+                        + "Naviděnou,\n"
+                        + "Vaše Oktávy";
 
-        if (zakaznikOpt.isPresent()) {
-            Zakaznik zakaznik = zakaznikOpt.get();
-            String userEmail = zakaznik.getMail();
-            String subject = "Lístky pro objednávku: " + order.getId();
-            String bodyText = "Dobrý den " + zakaznik.getJmeno() + ",\n\n"
-                    + "Děkujeme za zakoupení lístků. Lístky můžete najít v příloze.\n\n"
-                    + "Naviděnou,\n"
-                    + "Vaše Oktávy";
+                MimeMessage message = emailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-            // Create the MimeMessage
-            MimeMessage message = emailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+                helper.setFrom(username);
+                helper.setTo(userEmail);
+                helper.setSubject(subject);
+                helper.setText(bodyText);
 
-            // Set the email details
-            helper.setFrom(username); // Use your email address
-            helper.setTo(userEmail);
-            helper.setSubject(subject);
-            helper.setText(bodyText);
+                File ticketFile = generateTicketFile(order);
+                FileSystemResource file = new FileSystemResource(ticketFile);
+                helper.addAttachment("Ticket_" + order.getId() + ".pdf", file);
 
-            // Generate the ticket file
-            File ticketFile = generateTicketFile(order);
-            FileSystemResource file = new FileSystemResource(ticketFile);
-            helper.addAttachment("Ticket_" + order.getId() + ".pdf", file);
-
-            // Send the email
-            emailSender.send(message);
-            System.out.println("Tickets sent to " + userEmail + " for order ID: " + order.getId());
-        } else {
-            System.out.println("Zakaznik not found for order ID: " + order.getId());
+                emailSender.send(message);
+                log.info("Tickets sent to {} for order ID: {}", userEmail, order.getId());
+            } else {
+                log.warn("Zakaznik not found for order ID: {}", order.getId());
+            }
+        } catch (MessagingException e) {
+            log.error("Failed to send ticket email for order ID: {} due to messaging error: {}", order.getId(), e.getMessage());
+        } catch (IOException e) {
+            log.error("Failed to generate or send ticket for order ID: {} due to IO error: {}", order.getId(), e.getMessage());
+        } catch (Exception e) {
+            log.error("An unexpected error occurred while sending ticket email for order ID: {}", order.getId(), e);
         }
-    } catch (MessagingException e) {
-        e.printStackTrace();
-        System.out.println("Failed to send ticket email for order ID: " + order.getId() + " due to messaging error: " + e.getMessage());
-    } catch (IOException e) {
-        e.printStackTrace();
-        System.out.println("Failed to generate or send ticket for order ID: " + order.getId() + " due to IO error: " + e.getMessage());
-    } catch (Exception e) {
-        e.printStackTrace();
-        System.out.println("An unexpected error occurred while sending ticket email for order ID: " + order.getId());
     }
-}
-//-----------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     public File generateTicketFile(Objednavka order) throws IOException {
         File tempFile = File.createTempFile("Ticket_" + order.getId(), ".pdf");
 
@@ -273,7 +267,7 @@ private void sendTicketEmail(Objednavka order) {
 
         return tempFile;
     }
-
+//----------------------------------------------------------------------------------------------------------------------
     private String generateQRCodeImage(String text, int width, int height) throws Exception {
         String filePath = UUID.randomUUID() + "_QRCode.png";
         Path path = FileSystems.getDefault().getPath(filePath);
@@ -283,7 +277,7 @@ private void sendTicketEmail(Objednavka order) {
 
         return filePath;
     }
-//-----------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     private String getTextFromMessage(Message message) throws IOException, MessagingException {
         if (message.isMimeType("text/plain")) {
             return message.getContent().toString();
@@ -293,7 +287,7 @@ private void sendTicketEmail(Objednavka order) {
         }
         return "";
     }
-
+//----------------------------------------------------------------------------------------------------------------------
     private String getTextFromMimeMultipart(MimeMultipart mimeMultipart) throws IOException, MessagingException {
         StringBuilder result = new StringBuilder();
         int count = mimeMultipart.getCount();
