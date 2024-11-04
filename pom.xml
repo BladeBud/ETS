@@ -10,10 +10,10 @@
     </parent>
     <groupId>ruzicka</groupId>
     <artifactId>ETS</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+<!--    <version>0.0.1-SNAPSHOT</version>-->
     <name>ETS</name>
     <description>ETS</description>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <url/>
     <licenses>
         <license/>
