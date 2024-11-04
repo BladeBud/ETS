@@ -151,18 +151,18 @@ public class EmailCheckerService {
 
     private double extractAmount(String content) {
         try {
-            // Použije regulární výraz k nalezení částky ve formátu X,XX
-            Pattern pattern = Pattern.compile("Částka:\\s*([\\d,]+)");
+            // Update the regular expression to handle spaces and commas
+            Pattern pattern = Pattern.compile("Částka:\\s*([\\d\\s,]+)");
             Matcher matcher = pattern.matcher(content);
 
             if (matcher.find()) {
-                String amountStr = matcher.group(1).replace(",", "."); // Nahrazení čárky tečkou pro parsování
+                String amountStr = matcher.group(1).replace(" ", "").replace(",", "."); // Remove spaces and replace comma with dot
                 return Double.parseDouble(amountStr.trim());
             }
         } catch (NumberFormatException e) {
             log.error("Error parsing amount", e);
         }
-        return 0.0; // Pokud se nepodaří částku najít nebo převést, vrát 0
+        return 0.0; // Return 0 if the amount cannot be found or parsed
     }
     //-----------------------------------------------------------------------------------
     private boolean validateAndProcessPayment(String variableSymbol, double amount) {
