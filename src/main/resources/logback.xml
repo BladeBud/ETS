@@ -1,58 +1,36 @@
-<configuration  debug="true" >
+<configuration debug="true">
+    <!-- Define the log pattern -->
+    <property name="PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS}|%-5p|%-5.5t|%-40.40c %4L- %m%n"/>
+
+    <!-- Console appender for logging to console -->
     <appender name="FILE2" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <property name="PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS}|%-5p|%-5.5t|%-40.40c %4L- %m%n"/>
-
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-
+    <!-- RollingFileAppender for log rotation -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>./logs/ETS.log</file>
 
+        <!-- Define the rolling policy -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Daily rollover -->
+            <fileNamePattern>./logs/ETS.%d{yyyy-MM-dd}.log</fileNamePattern>
+        </rollingPolicy>
+
         <encoder>
-
             <charset>UTF-8</charset>
-
             <pattern>${PATTERN}</pattern>
-
         </encoder>
-
     </appender>
+
+    <!-- Root logger configuration -->
     <root level="INFO">
         <appender-ref ref="FILE" />
         <appender-ref ref="FILE2" />
     </root>
 
-    <logger name="ruzicka.ets"         level="DEBUG" />
+    <!-- Specific logger configuration -->
+    <logger name="ruzicka.ets" level="DEBUG" />
 </configuration>
-
-
-<!--<configuration  debug="true" >-->
-<!--<property name="PATTERN" value="xxxx %d{yyyy-MM-dd HH:mm:ss.SSS}|%-5p|%-5.5t|%-40.40c %4L- %m%n"/>-->
-
-<!--<appender name="FILE" class="ch.qos.logback.core.FileAppender">-->
-<!--    <file>./logs/ETS.log</file>-->
-<!--    <encoder>-->
-<!--        <charset>UTF-8</charset>-->
-<!--        <pattern>${PATTERN}</pattern>-->
-<!--    </encoder>-->
-<!--</appender>-->
-
-<!--&lt;!&ndash; Console Appender &ndash;&gt;-->
-<!--<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">-->
-<!--    <encoder>-->
-<!--        <charset>UTF-8</charset>-->
-<!--        <pattern>${PATTERN}</pattern>-->
-<!--    </encoder>-->
-<!--</appender>-->
-
-<!--<root level="INFO">-->
-<!--    <appender-ref ref="FILE" />-->
-<!--    <appender-ref ref="CONSOLE" />-->
-<!--</root>-->
-
-<!--<logger name="ruzicka.ets"         level="DEBUG" />-->
-<!--</configuration>-->
-
