@@ -11,4 +11,5 @@ import ruzicka.ets.db.MistoObjednavka;
 
 @Repository
 public interface MistoObjednavkaRepository extends JpaRepository<MistoObjednavka, Integer> {
+    int countByIdobjednavka(Integer id);
 }

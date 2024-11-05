@@ -223,7 +223,7 @@ public class EmailCheckerService {
 
                 emailSender.send(message);
                 log.info("Tickets sent to {} for order ID: {}", userEmail, order.getId());
-                importantLog.info("Tickets sent to {} for order ID: {}", userEmail, order.getId());
+
             } else {
                 log.warn("Zakaznik not found for order ID: {}", order.getId());
             }
@@ -252,7 +252,7 @@ public File generateTicketFile(Objednavka order) throws IOException {
 
             contentStream.beginText();
             contentStream.newLineAtOffset(50, 730);
-            contentStream.showText("Místo: " + order.getIdmisto().getStul().getNazev());
+//            contentStream.showText("Místo: " + order.getIdmisto().getStul().getNazev());
             contentStream.endText();
 
             String qrCodeData = "Id objednávky: " + order.getId() + ", Jméno: " + order.getIdzakaznik().getJmeno();

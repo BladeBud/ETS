@@ -26,18 +26,12 @@ public class Objednavka {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "idmisto",referencedColumnName = "idmisto", nullable = false)
-    private Misto idmisto;
-
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "idzakaznik",referencedColumnName = "idzakaznik", nullable = false)
     private Zakaznik idzakaznik;
 
     @Column(name = "cena", nullable = false)
     private Integer cena;
 
-    @Column(name = "quantity", nullable = false)
-    private Integer quantity;
 
     @Column(name = "datumcas", nullable = false)
     private Instant datumcas;
@@ -54,14 +48,6 @@ public class Objednavka {
         this.id = id;
     }
 
-    public Misto getIdmisto() {
-        return idmisto;
-    }
-
-    public void setIdmisto(Misto idmisto) {
-        this.idmisto = idmisto;
-    }
-
     public Zakaznik getIdzakaznik() {
         return idzakaznik;
     }
@@ -76,14 +62,6 @@ public class Objednavka {
 
     public void setCena(Integer cena) {
         this.cena = cena;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
     }
 
     public Instant getDatumcas() {

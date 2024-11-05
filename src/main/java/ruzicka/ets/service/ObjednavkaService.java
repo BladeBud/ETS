@@ -64,14 +64,14 @@ public class ObjednavkaService {
         List<Objednavka> expiredOrders = objednavkaRepository.findByDatumcasBeforeAndStatus(MinutesAgo, "R");
 
         for (Objednavka objednavka : expiredOrders) {
-            Stul relatedStul = objednavka.getIdmisto().getStul();
+            Stul relatedStul = null; // objednavka.getIdmisto().getStul();
 
             // Mark the order as expired
             objednavka.setStatus("E");
             objednavkaRepository.save(objednavka);
 
             // Restore the available quantity
-            int quantityToRestore = objednavka.getQuantity();
+            int quantityToRestore = mistoObjednavkaRepository.countByIdobjednavka(objednavka.getId());
             relatedStul.setAvailableQuantity(relatedStul.getAvailableQuantity() + quantityToRestore);
             stulRepository.save(relatedStul);
 
@@ -103,7 +103,7 @@ public class ObjednavkaService {
         }
 
         // Fetch available 'misto' for the provided address
-        List<Misto> availableMistoList = mistoRepository.findByStulAndStatus(stul, Misto.Status.A);
+        List<Misto> availableMistoList = mistoRepository.findByStulAndStatus(stul, Misto.Status.A.name());
         if (availableMistoList.isEmpty()) {
             log.warn("No available quantity for address: {} with requested quantity: {}", orderRequest.getAdresa(), orderRequest.getQuantity());
             return null;
@@ -140,7 +140,7 @@ public class ObjednavkaService {
 
 
             // Update the available quantity for this 'misto'
-            availableMisto.setStatus(Misto.Status.R);
+            availableMisto.setStatus(Misto.Status.R.name());
 
             mistoRepository.save(availableMisto);
 

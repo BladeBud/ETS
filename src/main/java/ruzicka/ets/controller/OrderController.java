@@ -42,7 +42,7 @@ public class OrderController {
 
     //----------------------------------------------------------------------------------------------------------------------
     @GetMapping("/misto")
-    public List<EventInfoDTO> getEventInfo(@RequestParam Integer random) {
+    public List<EventInfoDTO> getEventInfo(@RequestParam(required = false) Integer random) {
         log.info("Fetching event info...");
         List<Stul> stulList = stulRepository.findAll();
         return stulList.stream().map(stul -> {

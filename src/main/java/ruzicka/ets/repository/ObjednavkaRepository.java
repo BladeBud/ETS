@@ -19,7 +19,7 @@ public interface ObjednavkaRepository extends JpaRepository<Objednavka, Integer>
 
     List<Objednavka> findByDatumcasBeforeAndStatus(Instant tenMinutesAgo, String res);
 
-    List<Objednavka> findByIdmisto_AdresaAndStatus(Integer adresa, String r);
+    //List<Objednavka> findByIdmisto_AdresaAndStatus(Integer adresa, String r);
 
     //  List<Objednavka> findByZakaznikIdzakaznik(Integer zakaznikId);
 }

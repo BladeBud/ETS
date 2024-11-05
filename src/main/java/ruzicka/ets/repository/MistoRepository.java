@@ -20,8 +20,8 @@ public interface MistoRepository extends JpaRepository<Misto, Integer> {
 //            @Param("availableQuantity") Integer availableQuantity
 //    );
 
-    //TODO:select for update
-    Misto findByAdresa(String adresa);
+//    //TODO:select for update
+//    Misto findByAdresa(String adresa);
 
-    List<Misto> findByStulAndStatus(Stul stul, Misto.Status status);
+    List<Misto> findByStulAndStatus(Stul stul, String status);
 }

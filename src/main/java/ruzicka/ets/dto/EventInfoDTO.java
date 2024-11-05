@@ -12,7 +12,6 @@ public class EventInfoDTO {
 //----------------------------------------------------------------------------------------------------------------------
     private String adresa;
     private Integer avaiablequantity;
-    private Integer idzakaznik;
     private Integer cena;
 //----------------------------------------------------------------------------------------------------------------------
     // Getters and Setters
@@ -30,14 +29,6 @@ public class EventInfoDTO {
 
     public void setAvaiablequantity(Integer avaiablequantity) {
         this.avaiablequantity = avaiablequantity;
-    }
-
-    public Integer getIdzakaznik() {
-        return idzakaznik;
-    }
-
-    public void setIdzakaznik(Integer idzakaznik) {
-        this.idzakaznik = idzakaznik;
     }
 
     public Integer getCena() {

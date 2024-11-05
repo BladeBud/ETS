@@ -35,7 +35,7 @@ public class Misto {
     private Stul stul;
 
     @Column(name = "status", nullable = false)
-    private Status status;
+    private String status;
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -68,11 +68,11 @@ public class Misto {
         return this;
     }
 
-    public Status getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public Misto setStatus(Status status) {
+    public Misto setStatus(String status) {
         this.status = status;
         return this;
     }

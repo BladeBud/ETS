@@ -42,17 +42,22 @@ public class EmailVerificationService {
      * @param messageContent the body content of the verification email
      */
     public void sendVerificationEmail(Zakaznik zakaznik, String subject, String messageContent) {
-        Integer zakaznikId = zakaznik.getIdzakaznik();
+        try {
+            Integer zakaznikId = zakaznik.getIdzakaznik();
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(zakaznik.getMail());
-        message.setSubject(subject);
-        message.setText(messageContent + "\n\n" +
-                "Prosím klikněte na tento odkaz pro potvrzení mailu: " + //TODO: zmeit zneni mailu
-                "http://localhost:8080/api/tickets/verify-email?email=" + zakaznik.getMail() + "&id=" + zakaznikId); //TODO: Change to production URL
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(EMAIL);
+            message.setTo(zakaznik.getMail());
+            message.setSubject(subject);
+            message.setText(messageContent + "\n\n" +
+                    "Prosím klikněte na tento odkaz pro potvrzení mailu: " +
+                    "http://localhost:8080/api/tickets/verify-email?email=" + zakaznik.getMail() + "&id=" + zakaznikId);
 
-        emailSender.send(message);
-        log.info("Verification email sent to {}", zakaznik.getMail());
+            emailSender.send(message);
+            log.info("Verification email sent to {}", zakaznik.getMail());
+        } catch (Exception e) {
+            log.error("Failed to send verification email to {}: {}", zakaznik.getMail(), e.getMessage());
+        }
     }
 //----------------------------------------------------------------------------------------------------------------------
     /**

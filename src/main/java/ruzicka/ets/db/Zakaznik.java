@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 import java.sql.Timestamp;
@@ -18,14 +19,15 @@ import java.sql.Timestamp;
 public class Zakaznik {
     //----------------------------------------------------------------------------------------------------------------------
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "zakaznik_idzakaznik_seq")
+    @SequenceGenerator(name = "zakaznik_idzakaznik_seq", sequenceName = "zakaznik_idzakaznik_seq", allocationSize = 1)
     @Column(name = "idzakaznik", nullable = false)
     private Integer idzakaznik;
 
-    @Column(name = "jmeno", nullable = false, length = 255)
+    @Column(name = "jmeno", nullable = true, length = 255)
     private String jmeno;
 
-    @Column(name = "prijmeni", nullable = false, length = 255)
+    @Column(name = "prijmeni", nullable = true, length = 255)
     private String prijmeni;
 
     @Column(name = "mail", nullable = false, length = 255)
