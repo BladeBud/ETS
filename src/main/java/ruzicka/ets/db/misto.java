@@ -28,7 +28,7 @@ public class misto {
     private Integer idmisto;
 
     @Column(name = "adresa", nullable = false)
-    private Integer adresa;
+    private String adresa;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idtypmista", nullable = false)
@@ -49,11 +49,11 @@ public class misto {
         this.idmisto = idmisto;
     }
 
-    public Integer getAdresa() {
+    public String getAdresa() {
         return adresa;
     }
 
-    public void setAdresa(Integer adresa) {
+    public void setAdresa(String adresa) {
         this.adresa = adresa;
     }
 

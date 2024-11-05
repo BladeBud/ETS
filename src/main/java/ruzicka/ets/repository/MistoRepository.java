@@ -20,4 +20,8 @@ public interface MistoRepository extends JpaRepository<misto, Integer> {
             @Param("adresa") Integer adresa,
             @Param("availableQuantity") Integer availableQuantity
     );
+
+    //TODO:select for update
+    misto findByAdresa(String adresa);
+
 }

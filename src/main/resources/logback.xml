@@ -3,7 +3,7 @@
     <property name="PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS}|%-5p|%-5.5t|%-40.40c %4L- %m%n"/>
 
     <!-- Console appender for logging to console -->
-    <appender name="FILE2" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} - %msg%n</pattern>
         </encoder>
@@ -24,10 +24,25 @@
         </encoder>
     </appender>
 
+    <appender name="FILEDETAIL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>./logs/ETS-detail.log</file>
+
+        <!-- Define the rolling policy -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Daily rollover with compression -->
+            <fileNamePattern>./logs/ETS.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+    </appender>
+
     <!-- Root logger configuration -->
     <root level="INFO">
         <appender-ref ref="FILE" />
-        <appender-ref ref="FILE2" />
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILEDETAIL" />
     </root>
 
     <!-- Specific logger configuration -->

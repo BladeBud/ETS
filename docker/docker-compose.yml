@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: kali
+      POSTGRES_PASSWORD: kapitan
+      POSTGRES_DB: ETSdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ../db/:/docker-entrypoint-initdb.d/

@@ -50,11 +50,11 @@ public class OrderController {
         }).collect(Collectors.toList());
     }
 //----------------------------------------------------------------------------------------------------------------------
-    @PostMapping("/reserve")
-    public Objednavka reserveOrder(@RequestBody Objednavka objednavka) {
-        log.info("Reserving order: {}", objednavka);
-        return objednavkaService.reserveOrder(objednavka);
-    }
+   // @PostMapping("/reserve")
+//    public Objednavka reserveOrder(@RequestBody Objednavka objednavka) {
+//        log.info("Reserving order: {}", objednavka);
+//        return objednavkaService.reserveOrder(objednavka);
+//    }
 //----------------------------------------------------------------------------------------------------------------------
     @Scheduled(fixedRate = 60000) // TODO: Run every 10 minutes (domluvit se na nacasovani pokus se bude upravovat uparvit i v releaseexpiredreservations)
     public void cleanupExpiredReservations() {

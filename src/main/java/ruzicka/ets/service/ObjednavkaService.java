@@ -74,7 +74,15 @@ public class ObjednavkaService {
     public Objednavka createOrder(OrderRequestDTO orderRequest) {
         log.info("Attempting to create order for address: {} and quantity: {}", orderRequest.getAdresa(), orderRequest.getQuantity());
 
+        misto m = mistoRepository.findByAdresa(orderRequest.getAdresa());
+        if (m == null) {
+            log.warn("Address {} does not exist.", orderRequest.getAdresa());
+            return null;
+        }
+
+
         // Check if the address is already reserved
+        //TODO:
         if (isAddressReserved(orderRequest.getAdresa())) {
             log.warn("Address {} is already reserved.", orderRequest.getAdresa());
             return null;
