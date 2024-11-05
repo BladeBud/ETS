@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ruzicka.ets.db.Objednavka;
-import ruzicka.ets.db.Misto;
 import ruzicka.ets.db.Stul;
 import ruzicka.ets.dto.EventInfoDTO;
 import ruzicka.ets.dto.OrderRequestDTO;
@@ -43,8 +42,8 @@ public class OrderController {
 
     //----------------------------------------------------------------------------------------------------------------------
     @GetMapping("/misto")
-    public List<EventInfoDTO> getEventInfo(@RequestParam Integer adresa) {
-        log.info("Fetching event info for address: {}", adresa);
+    public List<EventInfoDTO> getEventInfo(@RequestParam Integer random) {
+        log.info("Fetching event info...");
         List<Stul> stulList = stulRepository.findAll();
         return stulList.stream().map(stul -> {
             EventInfoDTO response = new EventInfoDTO();
