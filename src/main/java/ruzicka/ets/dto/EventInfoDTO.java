@@ -10,17 +10,17 @@ package ruzicka.ets.dto;
  */
 public class EventInfoDTO {
 //----------------------------------------------------------------------------------------------------------------------
-    private Integer adresa;
+    private String adresa;
     private Integer avaiablequantity;
     private Integer idzakaznik;
     private Integer cena;
 //----------------------------------------------------------------------------------------------------------------------
     // Getters and Setters
-    public Integer getAdresa() {
+    public String getAdresa() {
         return adresa;
     }
 
-    public void setAdresa(Integer adresa) {
+    public void setAdresa(String adresa) {
         this.adresa = adresa;
     }
 

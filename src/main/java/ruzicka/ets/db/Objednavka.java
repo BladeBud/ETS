@@ -27,7 +27,7 @@ public class Objednavka {
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "idmisto",referencedColumnName = "idmisto", nullable = false)
-    private misto idmisto;
+    private Misto idmisto;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "idzakaznik",referencedColumnName = "idzakaznik", nullable = false)
@@ -54,11 +54,11 @@ public class Objednavka {
         this.id = id;
     }
 
-    public misto getIdmisto() {
+    public Misto getIdmisto() {
         return idmisto;
     }
 
-    public void setIdmisto(misto idmisto) {
+    public void setIdmisto(Misto idmisto) {
         this.idmisto = idmisto;
     }
 

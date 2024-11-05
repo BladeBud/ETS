@@ -71,23 +71,22 @@ create table stul
 (
     idstul   serial
         primary key,
-    status  varchar(20) not null,
+    nazev    varchar(255) not null unique ,
     avaiablequantity integer not null,
-    quantitysum      integer not null
+    quantitysum      integer not null,
+    idtypmista       integer not null
+        references typmista
 );
 
 create table misto
 (
     idmisto          serial
         primary key,
-    adresa           varchar(100) not null unique,
+    poradi           integer not null unique,
     idstul           integer
         references stul,
-    idtypmista       integer not null
-        references typmista
+    status          varchar(3) not null,
 );
-
-
 
 create table zakaznik
 (
@@ -100,7 +99,6 @@ create table zakaznik
     caspotvrzeni timestamp
 );
 
-
 create table objednavka
 (
     idobjednavka integer default nextval('objednavka_idobjednavaka_seq'::regclass) not null
@@ -112,6 +110,15 @@ create table objednavka
     cena         integer                                                           not null,
     quantity     integer                                                           not null,
     datumcas     timestamp                                                         not null,
-    status       varchar(3)                                                        not null
+    status       varchar(20)                                                        not null
 );
 
+create table misto_objednavka
+(
+    idmistoobjednavka integer default nextval('misto_objednavka_seq'::regclass) not null
+        primary key,
+    idmisto      integer not null
+        references misto,
+    idobjednavka integer not null
+        references objednavka
+);

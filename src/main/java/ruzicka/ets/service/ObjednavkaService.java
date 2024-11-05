@@ -2,14 +2,19 @@ package ruzicka.ets.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ruzicka.ets.db.MistoObjednavka;
 import ruzicka.ets.db.Objednavka;
+import ruzicka.ets.db.Stul;
 import ruzicka.ets.db.Zakaznik;
-import ruzicka.ets.db.misto;
+import ruzicka.ets.db.Misto;
 import ruzicka.ets.dto.OrderRequestDTO;
+import ruzicka.ets.repository.MistoObjednavkaRepository;
 import ruzicka.ets.repository.MistoRepository;
 import ruzicka.ets.repository.ObjednavkaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ruzicka.ets.repository.StulRepository;
+import ruzicka.ets.repository.ZakaznikRepository;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -25,6 +30,13 @@ public class ObjednavkaService {
 
     @Autowired
     private MistoRepository mistoRepository;
+
+    @Autowired
+    private StulRepository stulRepository;
+    @Autowired
+    private MistoObjednavkaRepository mistoObjednavkaRepository;
+    @Autowired
+    private ZakaznikRepository zakaznikRepository;
 
     // Find orders by zakaznikId
     public List<Objednavka> findOrdersByZakaznikId(Integer zakaznikId) {
@@ -55,7 +67,7 @@ public class ObjednavkaService {
         List<Objednavka> expiredOrders = objednavkaRepository.findByDatumcasBeforeAndStatus(tenMinutesAgo, "R");
 
         for (Objednavka objednavka : expiredOrders) {
-            misto relatedMisto = objednavka.getIdmisto();
+            Misto relatedMisto = objednavka.getIdmisto();
 
             // Mark the order as expired
             objednavka.setStatus("E");
@@ -71,77 +83,73 @@ public class ObjednavkaService {
     }
 
     // Create order with mixed 'misto' types and update available quantity
-    public Objednavka createOrder(OrderRequestDTO orderRequest) {
+
+    public synchronized Objednavka createOrder(OrderRequestDTO orderRequest) {
         log.info("Attempting to create order for address: {} and quantity: {}", orderRequest.getAdresa(), orderRequest.getQuantity());
 
-        misto m = mistoRepository.findByAdresa(orderRequest.getAdresa());
-        if (m == null) {
+        Zakaznik zakaznik = zakaznikRepository.findByMail(orderRequest.getMail());
+        if (zakaznik == null) {
+            log.warn("Zakaznik with mail {} does not exist.", orderRequest.getMail());
+            return null;
+        }
+
+        Stul stul = stulRepository.findByNazev(orderRequest.getAdresa());
+        if (stul == null) {
             log.warn("Address {} does not exist.", orderRequest.getAdresa());
             return null;
         }
 
-
-        // Check if the address is already reserved
-        //TODO:
-        if (isAddressReserved(orderRequest.getAdresa())) {
-            log.warn("Address {} is already reserved.", orderRequest.getAdresa());
+        if (stul.getAvailableQuantity() < orderRequest.getQuantity()) {
+            log.warn("Not enough available quantity for address: {}. Requested: {}, Available: {}", orderRequest.getAdresa(), orderRequest.getQuantity(), stul.getAvailableQuantity());
             return null;
         }
 
         // Fetch available 'misto' for the provided address
-        List<misto> availableMistoList = mistoRepository.findByAdresaAndAvailableQuantity(orderRequest.getAdresa(), orderRequest.getQuantity());
+        List<Misto> availableMistoList = mistoRepository.findByStulAndStatus(stul, Misto.Status.A);
         if (availableMistoList.isEmpty()) {
             log.warn("No available quantity for address: {} with requested quantity: {}", orderRequest.getAdresa(), orderRequest.getQuantity());
             return null;
         }
-
-        int totalOrderedQuantity = orderRequest.getQuantity();
-        int totalPrice = 0;
-        int remainingQuantityToFulfill = totalOrderedQuantity;
-
-        for (misto availableMisto : availableMistoList) {
-            int unitPrice = calculatePriceByType(availableMisto.getIdtypmista().getTypMista());
-            int availableQuantity = availableMisto.getAvailableQuantity();
-
-            if (remainingQuantityToFulfill <= 0) {
-                break;
-            }
-
-            // Calculate the quantity that can be used from this 'misto'
-            int quantityToUse = Math.min(availableQuantity, remainingQuantityToFulfill);
-
-            // Calculate the price for this portion and add it to the total price
-            totalPrice += unitPrice * quantityToUse;
-
-            // Update the remaining quantity that needs to be fulfilled
-            remainingQuantityToFulfill -= quantityToUse;
-
-            // Update the available quantity for this 'misto'
-            availableMisto.setAvailableQuantity(availableQuantity - quantityToUse);
-            mistoRepository.save(availableMisto);
-        }
-
-        // If we haven't fulfilled the total ordered quantity, the order cannot be placed
-        if (remainingQuantityToFulfill > 0) {
-            log.warn("Not enough available quantity for address: {}. Requested: {}, Available: {}", orderRequest.getAdresa(), totalOrderedQuantity, totalOrderedQuantity - remainingQuantityToFulfill);
-            return null;
+        if (availableMistoList.size() >= orderRequest.getQuantity()) {
+            log.warn("not enough available for address: {}. Requested: {}, Available: {}", orderRequest.getAdresa(), orderRequest.getQuantity(), availableMistoList.get(0).getAvailableQuantity());
         }
 
         // Create and save the order
         Objednavka objednavka = new Objednavka();
-        Zakaznik zakaznik = new Zakaznik();
-        zakaznik.setIdzakaznik(orderRequest.getZakaznikId());
         objednavka.setIdzakaznik(zakaznik);
-        objednavka.setIdmisto(availableMistoList.get(0)); // Assume we assign the first `misto` for now
-        objednavka.setQuantity(totalOrderedQuantity);
-        objednavka.setCena(totalPrice);  // Set the computed total price
+        objednavka.setCena(0);
         objednavka.setDatumcas(Instant.now());
         objednavka.setStatus("R");
 
-        Objednavka savedOrder = objednavkaRepository.save(objednavka);
-        log.info("Order successfully saved with ID: {}", savedOrder.getId());
+        objednavka = objednavkaRepository.save(objednavka);
+        log.info("Order successfully saved with ID: {}", objednavka.getId());
 
-        return savedOrder;
+        stul.setAvailableQuantity(stul.getAvailableQuantity() - orderRequest.getQuantity());
+        stulRepository.save(stul);
+
+        int totalOrderedQuantity = orderRequest.getQuantity();
+        int totalPrice = 0;
+
+        for (int i = 0; i < orderRequest.getQuantity(); i++) {
+            Misto availableMisto = availableMistoList.get(i);
+            int unitPrice = calculatePriceByType(availableMisto.getStul().getIdtypmista());
+
+
+            // Calculate the price for this portion and add it to the total price
+            totalPrice += unitPrice;
+
+
+            // Update the available quantity for this 'misto'
+            availableMisto.setStatus(Misto.Status.R);
+
+            mistoRepository.save(availableMisto);
+
+            mistoObjednavkaRepository.save(new MistoObjednavka(availableMisto, objednavka));
+        }
+        objednavka.setCena(totalPrice);
+        objednavkaRepository.save(objednavka);
+
+        return objednavka;
     }
 
     // Price calculation based on the 'typmista'
@@ -160,11 +168,5 @@ public class ObjednavkaService {
                 log.warn("Unknown 'typmista': {}. Defaulting to 0.", typmista);
                 return 0;  // Default to 0 in case of unknown type
         }
-    }
-
-    // Check if the address is already reserved
-    private boolean isAddressReserved(Integer adresa) {
-        List<Objednavka> reservedOrders = objednavkaRepository.findByIdmisto_AdresaAndStatus(adresa, "R");
-        return !reservedOrders.isEmpty();
     }
 }

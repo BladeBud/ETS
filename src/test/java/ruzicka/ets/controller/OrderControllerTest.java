@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ruzicka.ets.db.Typmista;
-import ruzicka.ets.db.misto;
+import ruzicka.ets.db.Misto;
 import ruzicka.ets.repository.MistoRepository;
 
 import java.util.List;
@@ -41,12 +41,12 @@ public class OrderControllerTest {
         Typmista typMista = new Typmista();
         typMista.setCena(2000);
 
-        misto mistoEntity = new misto();
+        Misto mistoEntity = new Misto();
         mistoEntity.setAdresa(1);
         mistoEntity.setAvailableQuantity(10);
         mistoEntity.setIdtypmista(typMista); // Set the TypMista object
 
-        List<misto> mistoList = List.of(mistoEntity);
+        List<Misto> mistoList = List.of(mistoEntity);
 
         // Mock repository behavior
         when(mistoRepository.findAll())

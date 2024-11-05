@@ -13,11 +13,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ruzicka.ets.db.Objednavka;
-import ruzicka.ets.db.misto;
+import ruzicka.ets.db.Misto;
+import ruzicka.ets.db.Stul;
 import ruzicka.ets.dto.EventInfoDTO;
 import ruzicka.ets.dto.OrderRequestDTO;
 import ruzicka.ets.dto.OrderResponseDTO;
 import ruzicka.ets.repository.MistoRepository;
+import ruzicka.ets.repository.StulRepository;
 import ruzicka.ets.service.ObjednavkaService;
 
 import java.util.List;
@@ -36,25 +38,23 @@ public class OrderController {
 
     @Value("${banking.details}")
     private String cisloUctu;
-//----------------------------------------------------------------------------------------------------------------------
+    @Autowired
+    private StulRepository stulRepository;
+
+    //----------------------------------------------------------------------------------------------------------------------
     @GetMapping("/misto")
     public List<EventInfoDTO> getEventInfo(@RequestParam Integer adresa) {
         log.info("Fetching event info for address: {}", adresa);
-        List<misto> mistoList = mistoRepository.findAll();
-        return mistoList.stream().map(misto -> {
+        List<Stul> stulList = stulRepository.findAll();
+        return stulList.stream().map(stul -> {
             EventInfoDTO response = new EventInfoDTO();
-            response.setAdresa(misto.getAdresa());
-            response.setAvaiablequantity(misto.getAvailableQuantity());
-            response.setCena(misto.getIdtypmista().getCena());
+            response.setAdresa(stul.getNazev());
+            response.setAvaiablequantity(stul.getAvailableQuantity());
+            response.setCena(stul.getIdtypmista().getCena());
             return response;
         }).collect(Collectors.toList());
     }
-//----------------------------------------------------------------------------------------------------------------------
-   // @PostMapping("/reserve")
-//    public Objednavka reserveOrder(@RequestBody Objednavka objednavka) {
-//        log.info("Reserving order: {}", objednavka);
-//        return objednavkaService.reserveOrder(objednavka);
-//    }
+
 //----------------------------------------------------------------------------------------------------------------------
     @Scheduled(fixedRate = 60000) // TODO: Run every 10 minutes (domluvit se na nacasovani pokus se bude upravovat uparvit i v releaseexpiredreservations)
     public void cleanupExpiredReservations() {
@@ -69,7 +69,7 @@ public class OrderController {
         if (objednavka != null) {
             OrderResponseDTO response = new OrderResponseDTO(
                     objednavka.getId(),
-                    objednavka.getIdmisto().getIdtypmista().getCena(),
+                    objednavka.getCena(),
                     cisloUctu
             );
             log.info("Order created successfully: {}", response);

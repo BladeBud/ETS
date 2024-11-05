@@ -19,16 +19,16 @@ import jakarta.persistence.Table;
  * Represents a 'misto' entity with details such as address, type, availability, and quantity information.
  */
 @Entity
-@Table(name = "misto")
-public class misto {
+@Table(name = "Stul")
+public class Stul {
 //----------------------------------------------------------------------------------------------------------------------
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name = "idmisto", nullable = false)
-    private Integer idmisto;
+    @Column(name = "idstul", nullable = false)
+    private Integer idstul;
 
-    @Column(name = "adresa", nullable = false)
-    private String adresa;
+    @Column(name = "nazev", nullable = false)
+    private String nazev;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idtypmista", nullable = false)
@@ -41,43 +41,49 @@ public class misto {
     private Integer quantitySum;
 //----------------------------------------------------------------------------------------------------------------------
     // Getters and Setters
-    public Integer getIdmisto() {
-        return idmisto;
+
+    public Integer getIdstul() {
+        return idstul;
     }
 
-    public void setIdmisto(Integer idmisto) {
-        this.idmisto = idmisto;
+    public Stul setIdstul(Integer idstul) {
+        this.idstul = idstul;
+        return this;
     }
 
-    public String getAdresa() {
-        return adresa;
+    public String getNazev() {
+        return nazev;
     }
 
-    public void setAdresa(String adresa) {
-        this.adresa = adresa;
+    public Stul setNazev(String nazev) {
+        this.nazev = nazev;
+        return this;
     }
 
     public Typmista getIdtypmista() {
         return idtypmista;
     }
 
-    public void setIdtypmista(Typmista idtypmista) {
+    public Stul setIdtypmista(Typmista idtypmista) {
         this.idtypmista = idtypmista;
+        return this;
     }
 
     public Integer getAvailableQuantity() {
         return availableQuantity;
     }
 
-    public void setAvailableQuantity(Integer availableQuantity) {
+    public Stul setAvailableQuantity(Integer availableQuantity) {
         this.availableQuantity = availableQuantity;
+        return this;
     }
 
     public Integer getQuantitySum() {
         return quantitySum;
     }
 
-    public void setQuantitySum(Integer quantitySum) {
+    public Stul setQuantitySum(Integer quantitySum) {
         this.quantitySum = quantitySum;
+        return this;
     }
 }
