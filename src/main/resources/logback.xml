@@ -9,16 +9,15 @@
         </encoder>
     </appender>
 
-    <!-- RollingFileAppender for log rotation -->
+    <!-- RollingFileAppender for log rotation and compression -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>./logs/ETS.log</file>
 
         <!-- Define the rolling policy -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- Daily rollover -->
-            <fileNamePattern>./logs/ETS.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- Daily rollover with compression -->
+            <fileNamePattern>./logs/ETS.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
         </rollingPolicy>
-
         <encoder>
             <charset>UTF-8</charset>
             <pattern>${PATTERN}</pattern>
