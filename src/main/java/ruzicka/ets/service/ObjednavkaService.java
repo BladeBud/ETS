@@ -68,7 +68,7 @@ public class ObjednavkaService {
         List<Objednavka> expiredOrders = objednavkaRepository.findByDatumcasBeforeAndStatus(tenMinutesAgo, "R");
 
         for (Objednavka objednavka : expiredOrders) {
-            Misto relatedMisto = objednavka.getIdmisto();
+            Stul relatedStul = objednavka.getIdmisto().getStul();
 
             // Mark the order as expired
             objednavka.setStatus("E");
@@ -76,10 +76,10 @@ public class ObjednavkaService {
 
             // Restore the available quantity
             int quantityToRestore = objednavka.getQuantity();
-            relatedMisto.setAvailableQuantity(relatedMisto.getAvailableQuantity() + quantityToRestore);
-            mistoRepository.save(relatedMisto);
+            relatedStul.setAvailableQuantity(relatedStul.getAvailableQuantity() + quantityToRestore);
+            stulRepository.save(relatedStul);
 
-            log.info("Order with ID {} set to expired and quantity {} restored to misto", objednavka.getId(), quantityToRestore);
+            log.info("Order with ID {} set to expired and quantity {} restored to stul", objednavka.getId(), quantityToRestore);
         }
     }
 
