@@ -19,6 +19,7 @@ import ruzicka.ets.repository.ZakaznikRepository;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ObjednavkaService {
@@ -87,8 +88,8 @@ public class ObjednavkaService {
     public synchronized Objednavka createOrder(OrderRequestDTO orderRequest) {
         log.info("Attempting to create order for address: {} and quantity: {}", orderRequest.getAdresa(), orderRequest.getQuantity());
 
-        Zakaznik zakaznik = zakaznikRepository.findByMail(orderRequest.getMail());
-        if (zakaznik == null) {
+        Optional<Zakaznik> zakaznik = zakaznikRepository.findByMail(orderRequest.getMail());
+        if (zakaznik.isEmpty()) {
             log.warn("Zakaznik with mail {} does not exist.", orderRequest.getMail());
             return null;
         }
@@ -111,12 +112,12 @@ public class ObjednavkaService {
             return null;
         }
         if (availableMistoList.size() >= orderRequest.getQuantity()) {
-            log.warn("not enough available for address: {}. Requested: {}, Available: {}", orderRequest.getAdresa(), orderRequest.getQuantity(), availableMistoList.get(0).getAvailableQuantity());
+            log.warn("not enough available for address: {}. Requested: {}, Available: {}", orderRequest.getAdresa(), orderRequest.getQuantity(), availableMistoList.get(0).getStul().getAvailableQuantity());
         }
 
         // Create and save the order
         Objednavka objednavka = new Objednavka();
-        objednavka.setIdzakaznik(zakaznik);
+        objednavka.setIdzakaznik(zakaznik.get());
         objednavka.setCena(0);
         objednavka.setDatumcas(Instant.now());
         objednavka.setStatus("R");
@@ -132,7 +133,7 @@ public class ObjednavkaService {
 
         for (int i = 0; i < orderRequest.getQuantity(); i++) {
             Misto availableMisto = availableMistoList.get(i);
-            int unitPrice = calculatePriceByType(availableMisto.getStul().getIdtypmista());
+            int unitPrice = calculatePriceByType(String.valueOf(availableMisto.getStul().getIdtypmista()));
 
 
             // Calculate the price for this portion and add it to the total price
@@ -144,7 +145,7 @@ public class ObjednavkaService {
 
             mistoRepository.save(availableMisto);
 
-            mistoObjednavkaRepository.save(new MistoObjednavka(availableMisto, objednavka));
+            mistoObjednavkaRepository.save(new MistoObjednavka().setIdmisto(availableMisto.getIdmisto()).setIdobjednavka(objednavka.getId()));
         }
         objednavka.setCena(totalPrice);
         objednavkaRepository.save(objednavka);
