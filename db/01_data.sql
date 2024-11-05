@@ -172,11 +172,24 @@ INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmist
 INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (153, 'druhepatrovlevo-21', 6, 6, 3);
 INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (154, 'druhepatrovlevo-22', 6, 6, 3);
 
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (155, 'druhepatrovzadu-27', 6, 6, 2);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (155, 'druhepatrovzadu-28', 6, 6, 2);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (155, 'druhepatrovzadu-29', 6, 6, 2);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (155, 'druhepatrovzadu-31', 6, 6, 2);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (155, 'druhepatrovzadu-32', 6, 6, 2);
+
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (156, 'prizemiloze-2', 6, 6, 4);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (157, 'prvnipatroloze-8', 12, 12, 4);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (158, 'prvnipatroloze-2', 6, 6, 4);
+
+
+
 INSERT INTO public.misto (idmisto, poradi, idstul, status) VALUES (1, '1', 1, 'A');
 INSERT INTO public.misto (idmisto, poradi, idstul, status) VALUES (2, '2', 1, 'A');
 INSERT INTO public.misto (idmisto, poradi, idstul, status) VALUES (3, '3', 1, 'A');
 INSERT INTO public.misto (idmisto, poradi, idstul, status) VALUES (4, '4', 1, 'A');
-INSERT INTO public.misto (idmisto, poradi, idstul, status) VALUES (5, '5', 1, 'A');
+INSERT INTO public.misto (idmisto, poradi, idstul, status) VALUES (5, '1', 2, 'A');
+
 
 INSERT INTO public.zakaznik (idzakaznik, jmeno, prijmeni, mail, status, caspotvrzeni) VALUES (1, null, null, 'adam.ruzicka@email.cz', 'V', null);
 
