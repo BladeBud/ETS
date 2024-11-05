@@ -65,13 +65,4 @@ public class ObjednavkaServiceTest {
         verify(objednavkaRepository, times(1)).save(objednavka);
     }
 
-    @Test
-    void testReserveOrder() {
-        Objednavka objednavka = new Objednavka();
-        when(objednavkaRepository.save(objednavka)).thenReturn(objednavka);
-
-        Objednavka result = objednavkaService.reserveOrder(objednavka);
-        assertNotNull(result);
-        verify(objednavkaRepository, times(1)).save(objednavka);
-    }
 }

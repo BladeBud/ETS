@@ -30,7 +30,7 @@
         <!-- Define the rolling policy -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- Daily rollover with compression -->
-            <fileNamePattern>./logs/ETS.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <fileNamePattern>./logs/ETSD.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
         </rollingPolicy>
         <encoder>
             <charset>UTF-8</charset>
@@ -42,9 +42,13 @@
     <root level="INFO">
         <appender-ref ref="FILE" />
         <appender-ref ref="CONSOLE" />
-        <appender-ref ref="FILEDETAIL" />
     </root>
 
     <!-- Specific logger configuration -->
     <logger name="ruzicka.ets" level="DEBUG" />
+
+    <!-- Logger for important information only -->
+    <logger name="importantLogger" level="INFO" additivity="false">
+        <appender-ref ref="FILEDETAIL" />
+    </logger>
 </configuration>

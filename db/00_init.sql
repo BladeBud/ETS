@@ -110,7 +110,7 @@ create table objednavka
     cena         integer                                                           not null,
     quantity     integer                                                           not null,
     datumcas     timestamp                                                         not null,
-    status       varchar(20)                                                        not null
+    status       varchar(20)                                                       not null
 );
 
 create table misto_objednavka

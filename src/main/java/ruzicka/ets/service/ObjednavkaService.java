@@ -23,8 +23,9 @@ import java.util.Optional;
 
 @Service
 public class ObjednavkaService {
-
+//------------------------------------------------------------------------------------------------
     private static final Logger log = LoggerFactory.getLogger(ObjednavkaService.class);
+    private static final Logger importantLog = LoggerFactory.getLogger("important");
 
     @Autowired
     private ObjednavkaRepository objednavkaRepository;
@@ -34,38 +35,33 @@ public class ObjednavkaService {
 
     @Autowired
     private StulRepository stulRepository;
+
     @Autowired
     private MistoObjednavkaRepository mistoObjednavkaRepository;
+
     @Autowired
     private ZakaznikRepository zakaznikRepository;
-
+//------------------------------------------------------------------------------------------------
     // Find orders by zakaznikId
     public List<Objednavka> findOrdersByZakaznikId(Integer zakaznikId) {
         return objednavkaRepository.findByIdzakaznik_Idzakaznik(zakaznikId);
     }
-
+//------------------------------------------------------------------------------------------------
     // Find order by orderId
     public Objednavka findOrderById(Integer orderId) {
         return objednavkaRepository.findById(orderId).orElse(null);
     }
-
+//------------------------------------------------------------------------------------------------
     // Save an order
     public Objednavka save(Objednavka objednavka) {
         return objednavkaRepository.save(objednavka);
     }
 
-    // Reserve an order
-    public Objednavka reserveOrder(Objednavka objednavka) {
-        log.info("Reserving order: {}", objednavka);
-        objednavka.setDatumcas(Instant.now());
-        objednavka.setStatus("R");
-        return objednavkaRepository.save(objednavka);
-    }
-
+//------------------------------------------------------------------------------------------------
     // Release expired reservations
     public void releaseExpiredReservations() {
-        Instant tenMinutesAgo = Instant.now().minus(10, ChronoUnit.MINUTES);
-        List<Objednavka> expiredOrders = objednavkaRepository.findByDatumcasBeforeAndStatus(tenMinutesAgo, "R");
+        Instant MinutesAgo = Instant.now().minus(30, ChronoUnit.MINUTES);
+        List<Objednavka> expiredOrders = objednavkaRepository.findByDatumcasBeforeAndStatus(MinutesAgo, "R");
 
         for (Objednavka objednavka : expiredOrders) {
             Stul relatedStul = objednavka.getIdmisto().getStul();
@@ -80,11 +76,12 @@ public class ObjednavkaService {
             stulRepository.save(relatedStul);
 
             log.info("Order with ID {} set to expired and quantity {} restored to stul", objednavka.getId(), quantityToRestore);
+            importantLog.info("Order with ID {} set to expired and quantity {} restored to stul", objednavka.getId(), quantityToRestore);
         }
     }
 
     // Create order with mixed 'misto' types and update available quantity
-
+//------------------------------------------------------------------------------------------------
     public synchronized Objednavka createOrder(OrderRequestDTO orderRequest) {
         log.info("Attempting to create order for address: {} and quantity: {}", orderRequest.getAdresa(), orderRequest.getQuantity());
 
@@ -124,6 +121,8 @@ public class ObjednavkaService {
 
         objednavka = objednavkaRepository.save(objednavka);
         log.info("Order successfully saved with ID: {}", objednavka.getId());
+        importantLog.info("Order created with ID: {}", objednavka.getId());
+
 
         stul.setAvailableQuantity(stul.getAvailableQuantity() - orderRequest.getQuantity());
         stulRepository.save(stul);

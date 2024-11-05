@@ -49,6 +49,7 @@ import java.util.regex.Pattern;
 public class EmailCheckerService {
     // ----------------------------------------------------------------------------------------------------------------------
     private static final Logger log = LoggerFactory.getLogger(EmailCheckerService.class);
+    private static final Logger importantLog = LoggerFactory.getLogger("important");
     private static final String HOST = "imap.seznam.cz";
 
     @Value("${email.username}")
@@ -181,6 +182,7 @@ public class EmailCheckerService {
                     objednavkaRepository.save(order);
 
                     sendTicketEmail(order);
+                    importantLog.info("Payment verified and order processed for symbol: {}", variableSymbol);
                     return true;
                 } else {
                     log.warn("Amount mismatch for order: {}", variableSymbol);
@@ -221,6 +223,7 @@ public class EmailCheckerService {
 
                 emailSender.send(message);
                 log.info("Tickets sent to {} for order ID: {}", userEmail, order.getId());
+                importantLog.info("Tickets sent to {} for order ID: {}", userEmail, order.getId());
             } else {
                 log.warn("Zakaznik not found for order ID: {}", order.getId());
             }
@@ -233,40 +236,40 @@ public class EmailCheckerService {
         }
     }
 //----------------------------------------------------------------------------------------------------------------------
-    public File generateTicketFile(Objednavka order) throws IOException {
-        File tempFile = File.createTempFile("Ticket_" + order.getId(), ".pdf");
+public File generateTicketFile(Objednavka order) throws IOException {
+    File tempFile = File.createTempFile("Ticket_" + order.getId(), ".pdf");
 
-        try (PDDocument document = new PDDocument()) {
-            PDPage page = new PDPage();
-            document.addPage(page);
+    try (PDDocument document = new PDDocument()) {
+        PDPage page = new PDPage();
+        document.addPage(page);
 
-            try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
-                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);
-                contentStream.beginText();
-                contentStream.newLineAtOffset(50, 750);
-                contentStream.showText("Jméno: " + order.getIdzakaznik().getJmeno());
-                contentStream.endText();
+        try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);
+            contentStream.beginText();
+            contentStream.newLineAtOffset(50, 750);
+            contentStream.showText("Jméno: " + order.getIdzakaznik().getJmeno());
+            contentStream.endText();
 
-                contentStream.beginText();
-                contentStream.newLineAtOffset(50, 730);
-                contentStream.showText("Místo: " + order.getIdmisto().getAdresa());
-                contentStream.endText();
+            contentStream.beginText();
+            contentStream.newLineAtOffset(50, 730);
+            contentStream.showText("Místo: " + order.getIdmisto().getStul().getNazev());
+            contentStream.endText();
 
-                String qrCodeData = "Id objednávky: " + order.getId() + ", Jméno: " + order.getIdzakaznik().getJmeno();
-                String qrCodeFilePath = generateQRCodeImage(qrCodeData, 150, 150);
+            String qrCodeData = "Id objednávky: " + order.getId() + ", Jméno: " + order.getIdzakaznik().getJmeno();
+            String qrCodeFilePath = generateQRCodeImage(qrCodeData, 150, 150);
 
-                BufferedImage qrImage = ImageIO.read(new File(qrCodeFilePath));
-                PDImageXObject pdImage = PDImageXObject.createFromFile(qrCodeFilePath, document);
-                contentStream.drawImage(pdImage, 50, 550);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
-            document.save(tempFile);
+            BufferedImage qrImage = ImageIO.read(new File(qrCodeFilePath));
+            PDImageXObject pdImage = PDImageXObject.createFromFile(qrCodeFilePath, document);
+            contentStream.drawImage(pdImage, 50, 550);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
-        return tempFile;
+        document.save(tempFile);
     }
+
+    return tempFile;
+}
 //----------------------------------------------------------------------------------------------------------------------
     private String generateQRCodeImage(String text, int width, int height) throws Exception {
         String filePath = UUID.randomUUID() + "_QRCode.png";
