@@ -17,7 +17,6 @@ import ruzicka.ets.db.Stul;
 import ruzicka.ets.dto.EventInfoDTO;
 import ruzicka.ets.dto.OrderRequestDTO;
 import ruzicka.ets.dto.OrderResponseDTO;
-import ruzicka.ets.repository.MistoRepository;
 import ruzicka.ets.repository.StulRepository;
 import ruzicka.ets.service.ObjednavkaService;
 

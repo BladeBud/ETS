@@ -69,7 +69,7 @@ public class ObjednavkaService {
         List<Objednavka> expiredOrders = objednavkaRepository.findByDatumcasBeforeAndStatus(MinutesAgo, "R");
 
         for (Objednavka objednavka : expiredOrders) {
-            Stul relatedStul = null; // objednavka.getIdmisto().getStul();
+            Stul relatedStul = null; // objednavka.getIdmisto().getStul(); //todo: ?
 
             // Mark the order as expired
             objednavka.setStatus("E");
@@ -85,7 +85,12 @@ public class ObjednavkaService {
         }
     }
 
-    // Create order with mixed 'misto' types and update available quantity
+    /**
+     * Creates an order based on the provided order request.
+     *
+     * @param orderRequest the details of the order
+     * @return the created Objednavka object
+     */
 //------------------------------------------------------------------------------------------------
     public synchronized Objednavka createOrder(OrderRequestDTO orderRequest) {
         log.info("Attempting to create order for address: {} and quantity: {}", orderRequest.getNazev(), orderRequest.getQuantity());
@@ -132,17 +137,14 @@ public class ObjednavkaService {
         stul.setAvailableQuantity(stul.getAvailableQuantity() - orderRequest.getQuantity());
         stulRepository.save(stul);
 
-//        int totalOrderedQuantity = orderRequest.getQuantity();
         int totalPrice = 0;
 
         for (int i = 0; i < orderRequest.getQuantity(); i++) {
             Misto availableMisto = availableMistoList.get(i);
             int unitPrice = calculatePriceByType(availableMisto.getStul().getIdtypmista().getTypMista());
 
-
             // Calculate the price for this portion and add it to the total price
             totalPrice += unitPrice;
-
 
             // Update the available quantity for this 'misto'
             availableMisto.setStatus(Misto.Status.R.name());
