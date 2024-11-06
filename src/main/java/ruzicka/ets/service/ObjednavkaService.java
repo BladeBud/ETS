@@ -85,13 +85,13 @@ public class ObjednavkaService {
         }
     }
 
+//------------------------------------------------------------------------------------------------
     /**
      * Creates an order based on the provided order request.
      *
      * @param orderRequest the details of the order
      * @return the created Objednavka object
      */
-//------------------------------------------------------------------------------------------------
     public synchronized Objednavka createOrder(OrderRequestDTO orderRequest) {
         log.info("Attempting to create order for address: {} and quantity: {}", orderRequest.getNazev(), orderRequest.getQuantity());
 
