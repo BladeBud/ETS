@@ -13,15 +13,6 @@ import java.util.List;
  */
 @Repository
 public interface MistoRepository extends JpaRepository<Misto, Integer> {
-
-//    @Query("SELECT m FROM misto m WHERE m.adresa = :adresa AND m.availableQuantity >= :availableQuantity")
-//    List<misto> findByAdresaAndAvailableQuantity(
-//            @Param("adresa") Integer adresa,
-//            @Param("availableQuantity") Integer availableQuantity
-//    );
-
-//    //TODO:select for update
-//    Misto findByAdresa(String adresa);
-
+//----------------------------------------------------------------------------------------------------------------------
     List<Misto> findByStulAndStatus(Stul stul, String status);
 }

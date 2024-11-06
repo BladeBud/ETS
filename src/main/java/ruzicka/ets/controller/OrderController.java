@@ -24,23 +24,31 @@ import ruzicka.ets.service.ObjednavkaService;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * OrderController class responsible for managing event information and order processing.
+ */
 @RestController
 public class OrderController {
-//----------------------------------------------------------------------------------------------------------------------
-    private static final Logger log = LoggerFactory.getLogger(OrderController.class);
 
-    @Autowired
-    private MistoRepository mistoRepository;
+    //----------------------------------------------------------------------------------------------------------------------
+    private static final Logger log = LoggerFactory.getLogger(OrderController.class);
 
     @Autowired
     private ObjednavkaService objednavkaService;
 
     @Value("${banking.details}")
     private String cisloUctu;
+
     @Autowired
     private StulRepository stulRepository;
 
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+    /**
+     * Fetches event information.
+     *
+     * @param random an optional request parameter
+     * @return List of EventInfoDTO containing event details
+     */
     @GetMapping("/misto")
     public List<EventInfoDTO> getEventInfo(@RequestParam(required = false) Integer random) {
         log.info("Fetching event info...");
@@ -55,12 +63,21 @@ public class OrderController {
     }
 
 //----------------------------------------------------------------------------------------------------------------------
-    @Scheduled(fixedRate = 60000) // TODO: Run every 10 minutes (domluvit se na nacasovani pokus se bude upravovat uparvit i v releaseexpiredreservations)
+    /**
+     * Cleans up expired reservations every 10 minutes.
+     */
+    @Scheduled(fixedRate = 600000) //runs every 10 minutes and reservations older than 30min are released
     public void cleanupExpiredReservations() {
         log.info("Cleaning up expired reservations");
         objednavkaService.releaseExpiredReservations();
     }
 //----------------------------------------------------------------------------------------------------------------------
+    /**
+     * Creates an order based on the provided order request.
+     *
+     * @param orderRequestDTO the details of the order
+     * @return ResponseEntity containing OrderResponseDTO on success, or HTTP 400 Bad Request on failure
+     */
     @PostMapping("/order")
     public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
         log.info("Creating order with request: {}", orderRequestDTO);

@@ -56,7 +56,7 @@ public class EmailVerificationService {
             helper.setText(messageContent + "<br><br>" +
                     "Prosím klikněte na tento odkaz pro potvrzení mailu: " +
                     "<a href=\"http://localhost:8080/api/tickets/verify-email?email=" + zakaznik.getMail() + "&id=" + zakaznikId +
-                    "\">Confirm Email</a>", true); // `true` indicates HTML
+                    "\">Ověřit mail</a>", true); // `true` indicates HTML
 
             emailSender.send(message);
             log.info("Verification email sent to {}", zakaznik.getMail());
