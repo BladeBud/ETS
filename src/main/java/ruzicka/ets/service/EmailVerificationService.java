@@ -1,11 +1,13 @@
 package ruzicka.ets.service;
 
+import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import ruzicka.ets.db.Zakaznik;
 import ruzicka.ets.repository.ZakaznikRepository;
@@ -45,18 +47,22 @@ public class EmailVerificationService {
         try {
             Integer zakaznikId = zakaznik.getIdzakaznik();
 
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(EMAIL);
-            message.setTo(zakaznik.getMail());
-            message.setSubject(subject);
-            message.setText(messageContent + "\n\n" +
+            MimeMessage message = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            helper.setFrom(EMAIL);
+            helper.setTo(zakaznik.getMail());
+            helper.setSubject(subject);
+            helper.setText(messageContent + "<br><br>" +
                     "Prosím klikněte na tento odkaz pro potvrzení mailu: " +
-                    "http://localhost:8080/api/tickets/verify-email?email=" + zakaznik.getMail() + "&id=" + zakaznikId);
+                    "<a href=\"http://localhost:8080/api/tickets/verify-email?email=" + zakaznik.getMail() + "&id=" + zakaznikId +
+                    "\">Confirm Email</a>", true); // `true` indicates HTML
 
             emailSender.send(message);
             log.info("Verification email sent to {}", zakaznik.getMail());
         } catch (Exception e) {
             log.error("Failed to send verification email to {}: {}", zakaznik.getMail(), e.getMessage());
+            e.printStackTrace(); // Outputs full stack trace for debugging
         }
     }
 //----------------------------------------------------------------------------------------------------------------------

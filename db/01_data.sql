@@ -1262,7 +1262,7 @@ INSERT INTO public.misto (idmisto, poradi, idstul, status) VALUES (1065, '5', 17
 INSERT INTO public.misto (idmisto, poradi, idstul, status) VALUES (1066, '6', 175, 'A');
 
 
-INSERT INTO public.zakaznik (idzakaznik, jmeno, prijmeni, mail, status, caspotvrzeni) VALUES (1, null, null, 'adam.ruzicka@email.cz', 'V', null);
+-- INSERT INTO public.zakaznik (idzakaznik, jmeno, prijmeni, mail, status, caspotvrzeni) VALUES (1, null, null, 'adam.ruzicka@email.cz', 'V', null);
 
 
 
