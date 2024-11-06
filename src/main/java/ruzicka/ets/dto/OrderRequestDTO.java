@@ -1,18 +1,18 @@
 package ruzicka.ets.dto;
 
 public class OrderRequestDTO {
-    private String adresa;
+    private String nazev;
     private Integer quantity;
     private Integer zakaznikId;
     private String mail;
 
     // Getters and Setters
-    public String getAdresa() {
-        return adresa;
+    public String getNazev() {
+        return nazev;
     }
 
-    public void setAdresa(String adresa) {
-        this.adresa = adresa;
+    public void setNazev(String nazev) {
+        this.nazev = nazev;
     }
 
     public Integer getQuantity() {

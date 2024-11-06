@@ -89,7 +89,8 @@ create table misto
 (
     idmisto          serial
         primary key,
-    poradi           integer not null unique,
+--     poradi           integer not null unique,
+    poradi           integer not null,
     idstul           integer
         references stul,
     status          varchar(3) not null

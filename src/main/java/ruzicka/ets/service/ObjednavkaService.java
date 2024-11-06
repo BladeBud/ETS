@@ -88,7 +88,7 @@ public class ObjednavkaService {
     // Create order with mixed 'misto' types and update available quantity
 //------------------------------------------------------------------------------------------------
     public synchronized Objednavka createOrder(OrderRequestDTO orderRequest) {
-        log.info("Attempting to create order for address: {} and quantity: {}", orderRequest.getAdresa(), orderRequest.getQuantity());
+        log.info("Attempting to create order for address: {} and quantity: {}", orderRequest.getNazev(), orderRequest.getQuantity());
 
         Optional<Zakaznik> zakaznik = zakaznikRepository.findByMail(orderRequest.getMail());
         if (zakaznik.isEmpty()) {
@@ -96,25 +96,25 @@ public class ObjednavkaService {
             return null;
         }
 
-        Stul stul = stulRepository.findByNazev(orderRequest.getAdresa());
+        Stul stul = stulRepository.findByNazev(orderRequest.getNazev());
         if (stul == null) {
-            log.warn("Address {} does not exist.", orderRequest.getAdresa());
+            log.warn("Address {} does not exist.", orderRequest.getNazev());
             return null;
         }
 
         if (stul.getAvailableQuantity() < orderRequest.getQuantity()) {
-            log.warn("Not enough available quantity for address: {}. Requested: {}, Available: {}", orderRequest.getAdresa(), orderRequest.getQuantity(), stul.getAvailableQuantity());
+            log.warn("Not enough available quantity for address: {}. Requested: {}, Available: {}", orderRequest.getNazev(), orderRequest.getQuantity(), stul.getAvailableQuantity());
             return null;
         }
 
         // Fetch available 'misto' for the provided address
         List<Misto> availableMistoList = mistoRepository.findByStulAndStatus(stul, Misto.Status.A.name());
         if (availableMistoList.isEmpty()) {
-            log.warn("No available quantity for address: {} with requested quantity: {}", orderRequest.getAdresa(), orderRequest.getQuantity());
+            log.warn("No available quantity for address: {} with requested quantity: {}", orderRequest.getNazev(), orderRequest.getQuantity());
             return null;
         }
         if (availableMistoList.size() <= orderRequest.getQuantity()) {
-            log.warn("not enough available for address: {}. Requested: {}, Available: {}", orderRequest.getAdresa(), orderRequest.getQuantity(), availableMistoList.get(0).getStul().getAvailableQuantity());
+            log.warn("not enough available for address: {}. Requested: {}, Available: {}", orderRequest.getNazev(), orderRequest.getQuantity(), availableMistoList.get(0).getStul().getAvailableQuantity());
         }
 
         // Create and save the order
@@ -158,7 +158,6 @@ public class ObjednavkaService {
     }
 
     // Price calculation based on the 'typmista'
-    //TODO: should not be hardcoded, should be fetched from a configuration or database
     private int calculatePriceByType(String typMista) {
         Typmista typMistaEntity = typMistaRepository.findByTypMista(typMista);
         if (typMistaEntity != null) {

@@ -47,7 +47,7 @@ public class OrderController {
         List<Stul> stulList = stulRepository.findAll();
         return stulList.stream().map(stul -> {
             EventInfoDTO response = new EventInfoDTO();
-            response.setAdresa(stul.getNazev());
+            response.setNazev(stul.getNazev());
             response.setAvaiablequantity(stul.getAvailableQuantity());
             response.setCena(stul.getIdtypmista().getCena());
             return response;
