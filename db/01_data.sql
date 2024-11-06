@@ -175,12 +175,29 @@ INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmist
 INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (155, 'druhepatrovzadu-27', 6, 6, 2);
 INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (155, 'druhepatrovzadu-28', 6, 6, 2);
 INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (155, 'druhepatrovzadu-29', 6, 6, 2);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (155, 'druhepatrovzadu-30', 6, 6, 2);
 INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (155, 'druhepatrovzadu-31', 6, 6, 2);
-INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (155, 'druhepatrovzadu-32', 6, 6, 2);
 
 INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (156, 'prizemiloze-2', 6, 6, 4);
-INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (157, 'prvnipatroloze-8', 12, 12, 4);
-INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (158, 'prvnipatroloze-2', 6, 6, 4);
+
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (157, 'prvnipatroloze-1', 10, 10, 4);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (158, 'prvnipatroloze-2', 10, 10, 4);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (159, 'prvnipatroloze-3', 10, 10, 4);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (160, 'prvnipatroloze-4', 6, 6, 4);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (161, 'prvnipatroloze-5', 6, 6, 4);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (162, 'prvnipatroloze-6', 6, 6, 4);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (163, 'prvnipatroloze-7', 6, 6, 4);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (164, 'prvnipatroloze-8', 12, 12, 4);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (165, 'prvnipatroloze-9', 6, 6, 4);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (166, 'prvnipatroloze-10', 6, 6, 4);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (167, 'prvnipatroloze-11', 10, 10, 4);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (168, 'prvnipatroloze-12', 6, 6, 4);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (169, 'prvnipatroloze-13', 6, 6, 4);
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (170, 'prvnipatroloze-14', 10, 10, 4);
+
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (171, 'druhepatroloze-4', 6, 6, 4);
+
+INSERT INTO public.stul (idstul, nazev, avaiablequantity, quantitysum, idtypmista) VALUES (172, 'stani', 1000, 1000, 1);
 
 
 
