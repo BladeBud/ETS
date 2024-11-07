@@ -210,7 +210,8 @@ private void sendTicketEmail(Objednavka order) {
             Zakaznik zakaznik = zakaznikOpt.get();
             String userEmail = zakaznik.getMail();
             String subject = "Lístky pro objednávku: " + order.getId();
-            String bodyText = "Dobrý den " + zakaznik.getJmeno() + ",\n\n"
+//            String bodyText = "Dobrý den " + zakaznik.getJmeno() + ",\n\n"
+            String bodyText = "Dobrý den " + ",\n\n"
                     + "Děkujeme za zakoupení lístků. Lístky můžete najít v příloze.\n\n"
                     + "Naviděnou,\n"
                     + "Vaše Oktávy";
@@ -236,6 +237,7 @@ private void sendTicketEmail(Objednavka order) {
 
             emailSender.send(message);
             log.info("Tickets sent to {} for order ID: {}", userEmail, order.getId());
+            importantLog.info("Tickets sent to {} for order ID: {}", userEmail, order.getId());
 
         } else {
             log.warn("Zakaznik not found for order ID: {}", order.getId());
