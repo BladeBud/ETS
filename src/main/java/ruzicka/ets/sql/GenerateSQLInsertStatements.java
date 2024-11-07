@@ -30,6 +30,7 @@ public class GenerateSQLInsertStatements {
 
         StringBuilder sqlStatements = new StringBuilder();
         int idmisto = 1;
+        int globalPoradi = 1;  // Initialize a global counter for poradi
 
         // Generating SQL statements based on available quantities
         for (Map.Entry<Integer, Integer> entry : stulData.entrySet()) {
@@ -39,9 +40,10 @@ public class GenerateSQLInsertStatements {
             for (int j = 1; j <= availableQuantity; j++) {
                 sqlStatements.append(String.format(
                         "INSERT INTO public.misto (idmisto, poradi, idstul, status) VALUES (%d, '%d', %d, 'A');%n",
-                        idmisto, j, idstul
+                        idmisto, globalPoradi, idstul
                 ));
                 idmisto++;
+                globalPoradi++;  // Increment the global counter
             }
         }
 

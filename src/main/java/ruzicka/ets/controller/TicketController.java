@@ -26,7 +26,7 @@ import java.util.Optional;
  * REST controller for managing customers' ticket-related operations.
  */
 @RestController
-@RequestMapping("/api/tickets")
+@RequestMapping("/api")
 public class TicketController {
 //----------------------------------------------------------------------------------------------------------------------
     @Autowired
