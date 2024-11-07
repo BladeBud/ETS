@@ -8,9 +8,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
  * Represents an order in the system.
@@ -38,6 +40,9 @@ public class Objednavka {
 
     @Column(name = "status", nullable = false, length = 3)
     private String status;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "idobjednavka")
+    private List<MistoObjednavka> mistoObjednavkaList;
 //----------------------------------------------------------------------------------------------------------------------
     // Getters and Setters
     public Integer getId() {
@@ -78,5 +83,14 @@ public class Objednavka {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public List<MistoObjednavka> getMistoObjednavkaList() {
+        return mistoObjednavkaList;
+    }
+
+    public Objednavka setMistoObjednavkaList(List<MistoObjednavka> mistoObjednavkaList) {
+        this.mistoObjednavkaList = mistoObjednavkaList;
+        return this;
     }
 }

@@ -28,8 +28,11 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import ruzicka.ets.db.Misto;
+import ruzicka.ets.db.MistoObjednavka;
 import ruzicka.ets.db.Objednavka;
 import ruzicka.ets.db.Zakaznik;
+import ruzicka.ets.repository.MistoRepository;
 import ruzicka.ets.repository.ObjednavkaRepository;
 import ruzicka.ets.repository.ZakaznikRepository;
 
@@ -66,6 +69,9 @@ public class EmailCheckerService {
 
     @Autowired
     private JavaMailSender emailSender;
+
+    @Autowired
+    private MistoRepository mistoRepository;
 //----------------------------------------------------------------------------------------------------------------------
     @PostConstruct
     public void init() {
@@ -196,48 +202,55 @@ public class EmailCheckerService {
         return false;
     }
 //----------------------------------------------------------------------------------------------------------------------
-    private void sendTicketEmail(Objednavka order) {
-        try {
-            Optional<Zakaznik> zakaznikOpt = zakaznikRepository.findById(order.getIdzakaznik().getIdzakaznik());
+private void sendTicketEmail(Objednavka order) {
+    try {
+        Optional<Zakaznik> zakaznikOpt = zakaznikRepository.findById(order.getIdzakaznik().getIdzakaznik());
 
-            if (zakaznikOpt.isPresent()) {
-                Zakaznik zakaznik = zakaznikOpt.get();
-                String userEmail = zakaznik.getMail();
-                String subject = "Lístky pro objednávku: " + order.getId();
-                String bodyText = "Dobrý den " + zakaznik.getJmeno() + ",\n\n"
-                        + "Děkujeme za zakoupení lístků. Lístky můžete najít v příloze.\n\n"
-                        + "Naviděnou,\n"
-                        + "Vaše Oktávy";
+        if (zakaznikOpt.isPresent()) {
+            Zakaznik zakaznik = zakaznikOpt.get();
+            String userEmail = zakaznik.getMail();
+            String subject = "Lístky pro objednávku: " + order.getId();
+            String bodyText = "Dobrý den " + zakaznik.getJmeno() + ",\n\n"
+                    + "Děkujeme za zakoupení lístků. Lístky můžete najít v příloze.\n\n"
+                    + "Naviděnou,\n"
+                    + "Vaše Oktávy";
 
-                MimeMessage message = emailSender.createMimeMessage();
-                MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            MimeMessage message = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-                helper.setFrom(username);
-                helper.setTo(userEmail);
-                helper.setSubject(subject);
-                helper.setText(bodyText);
+            helper.setFrom(username);
+            helper.setTo(userEmail);
+            helper.setSubject(subject);
+            helper.setText(bodyText);
 
-                File ticketFile = generateTicketFile(order);
-                FileSystemResource file = new FileSystemResource(ticketFile);
-                helper.addAttachment("Ticket_" + order.getId() + ".pdf", file);
-
-                emailSender.send(message);
-                log.info("Tickets sent to {} for order ID: {}", userEmail, order.getId());
-
-            } else {
-                log.warn("Zakaznik not found for order ID: {}", order.getId());
+            for (MistoObjednavka mistoObjednavka : order.getMistoObjednavkaList()) {
+                Optional<Misto> mistoOpt = mistoRepository.findById(mistoObjednavka.getIdmisto());
+                if (mistoOpt.isPresent()) {
+                    Misto misto = mistoOpt.get();
+                    String nazev = misto.getStul().getNazev();
+                    File ticketFile = generateTicketFile(order, nazev);
+                    FileSystemResource file = new FileSystemResource(ticketFile);
+                    helper.addAttachment("Ticket_" + order.getId() + "_" + nazev + ".pdf", file);
+                }
             }
-        } catch (MessagingException e) {
-            log.error("Failed to send ticket email for order ID: {} due to messaging error: {}", order.getId(), e.getMessage());
-        } catch (IOException e) {
-            log.error("Failed to generate or send ticket for order ID: {} due to IO error: {}", order.getId(), e.getMessage());
-        } catch (Exception e) {
-            log.error("An unexpected error occurred while sending ticket email for order ID: {}", order.getId(), e);
+
+            emailSender.send(message);
+            log.info("Tickets sent to {} for order ID: {}", userEmail, order.getId());
+
+        } else {
+            log.warn("Zakaznik not found for order ID: {}", order.getId());
         }
+    } catch (MessagingException e) {
+        log.error("Failed to send ticket email for order ID: {} due to messaging error: {}", order.getId(), e.getMessage());
+    } catch (IOException e) {
+        log.error("Failed to generate or send ticket for order ID: {} due to IO error: {}", order.getId(), e.getMessage());
+    } catch (Exception e) {
+        log.error("An unexpected error occurred while sending ticket email for order ID: {}", order.getId(), e);
     }
+}
 //----------------------------------------------------------------------------------------------------------------------
-public File generateTicketFile(Objednavka order) throws IOException {
-    File tempFile = File.createTempFile("Ticket_" + order.getId(), ".pdf");
+public File generateTicketFile(Objednavka order, String seatName) throws IOException {
+    File tempFile = File.createTempFile("Ticket_" + order.getId() + "_" + seatName, ".pdf");
 
     try (PDDocument document = new PDDocument()) {
         PDPage page = new PDPage();
@@ -252,10 +265,10 @@ public File generateTicketFile(Objednavka order) throws IOException {
 
             contentStream.beginText();
             contentStream.newLineAtOffset(50, 730);
-//            contentStream.showText("Místo: " + order.getIdmisto().getStul().getNazev());
+            contentStream.showText("Místo: " + seatName);
             contentStream.endText();
 
-            String qrCodeData = "Id objednávky: " + order.getId() + ", Jméno: " + order.getIdzakaznik().getJmeno();
+            String qrCodeData = "Id objednávky: " + order.getId() + ", Jméno: " + order.getIdzakaznik().getJmeno() + ", Místo: " + seatName;
             String qrCodeFilePath = generateQRCodeImage(qrCodeData, 150, 150);
 
             BufferedImage qrImage = ImageIO.read(new File(qrCodeFilePath));

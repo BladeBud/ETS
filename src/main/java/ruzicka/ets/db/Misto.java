@@ -30,7 +30,7 @@ public class Misto {
     @Column(name = "poradi", nullable = false)
     private String poradi;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idstul", nullable = false)
     private Stul stul;
 

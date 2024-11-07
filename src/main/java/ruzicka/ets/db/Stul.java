@@ -30,7 +30,7 @@ public class Stul {
     @Column(name = "nazev", nullable = false)
     private String nazev;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idtypmista", nullable = false)
     private Typmista idtypmista;
 

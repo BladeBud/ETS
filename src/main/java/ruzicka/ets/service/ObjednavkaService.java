@@ -65,26 +65,37 @@ public class ObjednavkaService {
 //------------------------------------------------------------------------------------------------
     // Release expired reservations
     public void releaseExpiredReservations() {
-        Instant MinutesAgo = Instant.now().minus(30, ChronoUnit.MINUTES);
-        List<Objednavka> expiredOrders = objednavkaRepository.findByDatumcasBeforeAndStatus(MinutesAgo, "R");
+        Instant minutesAgo = Instant.now().minus(30, ChronoUnit.MINUTES);
+        List<Objednavka> expiredOrders = objednavkaRepository.findByDatumcasBeforeAndStatus(minutesAgo, "R");
 
         for (Objednavka objednavka : expiredOrders) {
-            Stul relatedStul = null; // objednavka.getIdmisto().getStul(); //todo: ?
-
             // Mark the order as expired
             objednavka.setStatus("E");
             objednavkaRepository.save(objednavka);
 
-            // Restore the available quantity
-            int quantityToRestore = mistoObjednavkaRepository.countByIdobjednavka(objednavka.getId());
-            relatedStul.setAvailableQuantity(relatedStul.getAvailableQuantity() + quantityToRestore);
-            stulRepository.save(relatedStul);
+            // Get all MistoObjednavka records associated with the order
+            List<MistoObjednavka> mistoObjednavkaList = mistoObjednavkaRepository.findByIdobjednavka(objednavka.getId());
 
-            log.info("Order with ID {} set to expired and quantity {} restored to stul", objednavka.getId(), quantityToRestore);
-            importantLog.info("Order with ID {} set to expired and quantity {} restored to stul", objednavka.getId(), quantityToRestore);
+            for (MistoObjednavka mistoObjednavka : mistoObjednavkaList) {
+                // Get the Misto and Stul associated with the MistoObjednavka
+                Misto misto = mistoRepository.findById(mistoObjednavka.getIdmisto()).orElse(null);
+                if (misto != null) {
+                    Stul stul = misto.getStul();
+
+                    // Restore the seat status to available
+                    misto.setStatus(Misto.Status.A.name());
+                    mistoRepository.save(misto);
+
+                    // Restore the available quantity for the table
+                    stul.setAvailableQuantity(stul.getAvailableQuantity() + 1);
+                    stulRepository.save(stul);
+                }
+            }
+
+            log.info("Order with ID {} set to expired and associated seats and tables restored", objednavka.getId());
+            importantLog.info("Order with ID {} set to expired and associated seats and tables restored", objednavka.getId());
         }
     }
-
 //------------------------------------------------------------------------------------------------
     /**
      * Creates an order based on the provided order request.
