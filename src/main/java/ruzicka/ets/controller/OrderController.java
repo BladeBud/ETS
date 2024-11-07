@@ -38,6 +38,9 @@ public class OrderController {
     @Value("${banking.details}")
     private String cisloUctu;
 
+    @Value("${banking.iban}")
+    private String iban;
+
     @Autowired
     private StulRepository stulRepository;
 
@@ -85,7 +88,8 @@ public class OrderController {
             OrderResponseDTO response = new OrderResponseDTO(
                     objednavka.getId(),
                     objednavka.getCena(),
-                    cisloUctu
+                    cisloUctu,
+                    iban
             );
             log.info("Order created successfully: {}", response);
             return ResponseEntity.ok(response);
