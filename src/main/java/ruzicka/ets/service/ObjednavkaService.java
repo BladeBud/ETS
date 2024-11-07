@@ -92,8 +92,15 @@ public class ObjednavkaService {
      * @param orderRequest the details of the order
      * @return the created Objednavka object
      */
+
     public synchronized Objednavka createOrder(OrderRequestDTO orderRequest) {
-        log.info("Attempting to create order for address: {} and quantity: {}", orderRequest.getNazev(), orderRequest.getQuantity());
+        log.info("Attempting to create order for tables: {} and quantities: {}", orderRequest.getNazvy(), orderRequest.getQuantities());
+
+        // Check if the order contains at least one table
+        if (orderRequest.getNazvy() == null || orderRequest.getNazvy().isEmpty()) {
+            log.warn("Order request does not contain any tables.");
+            return null;
+        }
 
         Optional<Zakaznik> zakaznik = zakaznikRepository.findByMail(orderRequest.getMail());
         if (zakaznik.isEmpty()) {
@@ -101,28 +108,10 @@ public class ObjednavkaService {
             return null;
         }
 
-        Stul stul = stulRepository.findByNazev(orderRequest.getNazev());
-        if (stul == null) {
-            log.warn("Address {} does not exist.", orderRequest.getNazev());
-            return null;
-        }
+        List<String> tableNames = orderRequest.getNazvy();
+        List<Integer> quantities = orderRequest.getQuantities();
+        int totalPrice = 0;
 
-        if (stul.getAvailableQuantity() < orderRequest.getQuantity()) {
-            log.warn("Not enough available quantity for address: {}. Requested: {}, Available: {}", orderRequest.getNazev(), orderRequest.getQuantity(), stul.getAvailableQuantity());
-            return null;
-        }
-
-        // Fetch available 'misto' for the provided address
-        List<Misto> availableMistoList = mistoRepository.findByStulAndStatus(stul, Misto.Status.A.name());
-        if (availableMistoList.isEmpty()) {
-            log.warn("No available quantity for address: {} with requested quantity: {}", orderRequest.getNazev(), orderRequest.getQuantity());
-            return null;
-        }
-        if (availableMistoList.size() <= orderRequest.getQuantity()) {
-            log.warn("not enough available for address: {}. Requested: {}, Available: {}", orderRequest.getNazev(), orderRequest.getQuantity(), availableMistoList.get(0).getStul().getAvailableQuantity());
-        }
-
-        // Create and save the order
         Objednavka objednavka = new Objednavka();
         objednavka.setIdzakaznik(zakaznik.get());
         objednavka.setCena(0);
@@ -133,26 +122,46 @@ public class ObjednavkaService {
         log.info("Order successfully saved with ID: {}", objednavka.getId());
         importantLog.info("Order created with ID: {}", objednavka.getId());
 
+        for (int i = 0; i < tableNames.size(); i++) {
+            String tableName = tableNames.get(i);
+            int quantity = quantities.get(i);
 
-        stul.setAvailableQuantity(stul.getAvailableQuantity() - orderRequest.getQuantity());
-        stulRepository.save(stul);
+            // Check if the table exists
+            Stul stul = stulRepository.findByNazev(tableName.trim());
+            if (stul == null) {
+                log.warn("Table {} does not exist.", tableName);
+                continue;
+            }
 
-        int totalPrice = 0;
+            // Get all available seats for the table
+            List<Misto> availableMistoList = mistoRepository.findByStulAndStatus(stul, Misto.Status.A.name());
+            if (availableMistoList.size() < quantity) {
+                log.warn("Not enough available seats for table: {}. Requested: {}, Available: {}", tableName, quantity, availableMistoList.size());
+                continue;
+            }
 
-        for (int i = 0; i < orderRequest.getQuantity(); i++) {
-            Misto availableMisto = availableMistoList.get(i);
-            int unitPrice = calculatePriceByType(availableMisto.getStul().getIdtypmista().getTypMista());
+            // Mark the required seats as reserved and create records in the linking table
+            for (int j = 0; j < quantity; j++) {
+                Misto availableMisto = availableMistoList.get(j);
+                int unitPrice = calculatePriceByType(availableMisto.getStul().getIdtypmista().getTypMista());
 
-            // Calculate the price for this portion and add it to the total price
-            totalPrice += unitPrice;
+                totalPrice += unitPrice;
 
-            // Update the available quantity for this 'misto'
-            availableMisto.setStatus(Misto.Status.R.name());
+                availableMisto.setStatus(Misto.Status.R.name());
+                mistoRepository.save(availableMisto);
 
-            mistoRepository.save(availableMisto);
+                MistoObjednavka mistoObjednavka = new MistoObjednavka();
+                mistoObjednavka.setIdmisto(availableMisto.getIdmisto());
+                mistoObjednavka.setIdobjednavka(objednavka.getId());
+                mistoObjednavkaRepository.save(mistoObjednavka);
+            }
 
-            mistoObjednavkaRepository.save(new MistoObjednavka().setIdmisto(availableMisto.getIdmisto()).setIdobjednavka(objednavka.getId()));
+            // Update the available quantity for the table
+            stul.setAvailableQuantity(stul.getAvailableQuantity() - quantity);
+            stulRepository.save(stul);
         }
+
+        // Save the total price to the order
         objednavka.setCena(totalPrice);
         objednavkaRepository.save(objednavka);
 

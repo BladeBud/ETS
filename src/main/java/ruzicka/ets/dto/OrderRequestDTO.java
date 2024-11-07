@@ -1,26 +1,28 @@
 package ruzicka.ets.dto;
 
+import java.util.List;
+
 public class OrderRequestDTO {
-    private String nazev;
-    private Integer quantity;
+    private List<String> nazvy; // List of table names
+    private List<Integer> quantities; // List of quantities for each table
     private Integer zakaznikId;
     private String mail;
 
     // Getters and Setters
-    public String getNazev() {
-        return nazev;
+    public List<String> getNazvy() {
+        return nazvy;
     }
 
-    public void setNazev(String nazev) {
-        this.nazev = nazev;
+    public void setNazvy(List<String> nazvy) {
+        this.nazvy = nazvy;
     }
 
-    public Integer getQuantity() {
-        return quantity;
+    public List<Integer> getQuantities() {
+        return quantities;
     }
 
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
+    public void setQuantities(List<Integer> quantities) {
+        this.quantities = quantities;
     }
 
     public Integer getZakaznikId() {
@@ -30,11 +32,12 @@ public class OrderRequestDTO {
     public void setZakaznikId(Integer zakaznikId) {
         this.zakaznikId = zakaznikId;
     }
+
     public void setMail(String mail) {
         this.mail = mail;
     }
 
     public String getMail() {
-       return mail;
+        return mail;
     }
 }
