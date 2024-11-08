@@ -57,7 +57,7 @@ public class EmailVerificationService {
             helper.setSubject(subject);
             helper.setText(messageContent + "<br><br>" +
                     "Prosím klikněte na tento odkaz pro potvrzení mailu: " +
-                    "<a href=\"http://localhost:8080/api/ticket/verify-email?email=" + zakaznik.getMail() + "&id=" + zakaznikId +
+                    "<a href=\"http://plesgymjh.cz/api/ticket/verify-email?email=" + zakaznik.getMail() + "&id=" + zakaznikId +
                     "\">Ověřit mail</a>", true); // TODO: Update the URL to match the production environment
 
             emailSender.send(message);

@@ -5,6 +5,7 @@ package ruzicka.ets.dto;
  * @since 2024-11-08
  */
 public class EmailDTO {
+//----------------------------------------------------------------------------------------------------------------------
     private String email;
 
     public EmailDTO() {

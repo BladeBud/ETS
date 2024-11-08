@@ -1,5 +1,7 @@
 package ruzicka.ets.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +32,8 @@ import java.util.Optional;
 @RequestMapping("/api/ticket")
 public class TicketController {
 //----------------------------------------------------------------------------------------------------------------------
+    private static final Logger importantLog = LoggerFactory.getLogger("important");
+
     @Autowired
     private ZakaznikRepository zakaznikRepository;
 
@@ -39,6 +43,13 @@ public class TicketController {
     @Autowired
     private EmailVerificationService emailService;
 //----------------------------------------------------------------------------------------------------------------------
+    /**
+     * Endpoint to log in or register a customer based on the provided email address.
+     *
+     * @param emailDTO The email address to be logged in or registered.
+     * @return A ResponseEntity containing a list of orders if the customer is logged in,
+     *         or a message if the customer is registered.
+     */
 
     @PostMapping("/login-register")
     public ResponseEntity<?> loginOrRegister(@RequestBody EmailDTO emailDTO) {
@@ -49,8 +60,10 @@ public class TicketController {
             Zakaznik user = existingUser.get();
             if ("V".equals(user.getStatus())) { // Verified
                 List<Objednavka> orders = objednavkaRepository.findByIdzakaznik_Idzakaznik(user.getIdzakaznik());
+                importantLog.info("User with email {} logged in successfully.", email);
                 return ResponseEntity.ok(orders);
             } else {
+                importantLog.warn("User with email {} attempted to log in without verifying email.", email);
                 return ResponseEntity.status(403).body("Please verify your email.");
             }
         } else {
@@ -61,6 +74,7 @@ public class TicketController {
 
             // Send verification email with Zakaznik ID
             emailService.sendVerificationEmail(newUser, "Ověření mailu Ples", "Prosím ověřte svůj mail.");
+            importantLog.info("New user with email {} registered and verification email sent.", email);
 
             return ResponseEntity.ok("Verification email sent.");
         }
@@ -80,8 +94,10 @@ public class TicketController {
         boolean verified = emailService.verifyEmail(email, id);
 
         if (verified) {
+            importantLog.info("Email verified successfully for email: {}", email);
             return ResponseEntity.ok("Email verified successfully.");
         } else {
+            importantLog.warn("Email verification failed for email: {}", email);
             return ResponseEntity.status(404).body("Email verification failed. Invalid ID or email.");
         }
     }
