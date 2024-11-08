@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 /**
  * OrderController class responsible for managing event information and order processing.
  */
-@RequestMapping("/api")
+@RequestMapping("/api/order")
 @RestController
 public class OrderController {
 
