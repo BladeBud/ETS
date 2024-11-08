@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ruzicka.ets.db.Objednavka;
 import ruzicka.ets.db.Zakaznik;
+import ruzicka.ets.dto.EmailDTO;
 import ruzicka.ets.repository.ObjednavkaRepository;
 import ruzicka.ets.repository.ZakaznikRepository;
 import ruzicka.ets.service.EmailVerificationService;
@@ -26,7 +27,7 @@ import java.util.Optional;
  * REST controller for managing customers' ticket-related operations.
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/ticket")
 public class TicketController {
 //----------------------------------------------------------------------------------------------------------------------
     @Autowired
@@ -38,18 +39,10 @@ public class TicketController {
     @Autowired
     private EmailVerificationService emailService;
 //----------------------------------------------------------------------------------------------------------------------
-    /**
-     * Handles the login or registration process for customers.
-     * If the customer exists and is verified, returns their orders.
-     * If not verified, asks for email verification.
-     * If the customer does not exist, creates a new record and sends a verification email.
-     *
-     * @param email The email of the customer attempting to log in or register.
-     * @return A ResponseEntity containing the status and message or list of orders,
-     *         based on the customer's verification status and existence in the system.
-     */
+
     @PostMapping("/login-register")
-    public ResponseEntity<?> loginOrRegister(@RequestBody String email) {
+    public ResponseEntity<?> loginOrRegister(@RequestBody EmailDTO emailDTO) {
+        String email = emailDTO.getEmail();
         Optional<Zakaznik> existingUser = zakaznikRepository.findByMail(email);
 
         if (existingUser.isPresent()) {
