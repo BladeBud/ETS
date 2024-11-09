@@ -45,6 +45,8 @@ public class EmailVerificationService {
      */
     public void sendVerificationEmail(Zakaznik zakaznik, String subject, String messageContent) {
         try {
+            log.info("Preparing to send verification email to customer email: {}", zakaznik.getMail());
+
             Integer zakaznikId = zakaznik.getIdzakaznik();
 
             MimeMessage message = emailSender.createMimeMessage();
@@ -55,7 +57,7 @@ public class EmailVerificationService {
             helper.setSubject(subject);
             helper.setText(messageContent + "<br><br>" +
                     "Prosím klikněte na tento odkaz pro potvrzení mailu: " +
-                    "<a href=\"https://plesgymjh.cz/api/ticket/verify-email?email=" + zakaznik.getMail() + "&id=" + zakaznikId +
+                    "<a href=\"http://plesgymjh.cz/api/ticket/verify-email?email=" + zakaznik.getMail() + "&id=" + zakaznikId +
                     "\">Ověřit mail</a>", true); // TODO: Update the URL to match the production environment
 
             emailSender.send(message);
