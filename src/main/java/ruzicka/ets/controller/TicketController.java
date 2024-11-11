@@ -95,10 +95,10 @@ public class TicketController {
 
         if (verified) {
             importantLog.info("Email verified successfully for email: {}", email);
-            return ResponseEntity.ok("Email verified successfully.");
+            return ResponseEntity.ok("Email ověřen úspěšně. <a href=\"https://www.plesgymjh.cz/selection.html\">Lístky si objednejte zde</a>");
         } else {
             importantLog.warn("Email verification failed for email: {}", email);
-            return ResponseEntity.status(404).body("Email verification failed. Invalid ID or email.");
+            return ResponseEntity.status(404).body("Ověření emailu neprošlo.");
         }
     }
 }
