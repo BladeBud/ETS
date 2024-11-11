@@ -178,7 +178,7 @@ public class ObjednavkaService {
 
         return objednavka;
     }
-
+//------------------------------------------------------------------------------------------------
     // Price calculation based on the 'typmista'
     private int calculatePriceByType(String typMista) {
         Typmista typMistaEntity = typMistaRepository.findByTypMista(typMista);
