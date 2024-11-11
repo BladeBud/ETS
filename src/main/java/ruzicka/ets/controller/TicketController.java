@@ -98,7 +98,7 @@ public class TicketController {
             return ResponseEntity.ok("Email ověřen úspěšně. <a href=\"https://www.plesgymjh.cz/selection.html\">Lístky si objednejte zde</a>");
         } else {
             importantLog.warn("Email verification failed for email: {}", email);
-            return ResponseEntity.status(404).body("Ověření emailu neprošlo.");
+            return ResponseEntity.status(404).body("Email se nepovedlo ověřit.");
         }
     }
 }
