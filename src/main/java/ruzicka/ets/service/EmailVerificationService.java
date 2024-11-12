@@ -79,6 +79,10 @@ public class EmailVerificationService {
         Optional<Zakaznik> zakaznikOptional = zakaznikRepository.findByMail(email);
         if (zakaznikOptional.isPresent()) {
             Zakaznik zakaznik = zakaznikOptional.get();
+            if ("V".equals(zakaznik.getStatus())) {
+                log.info("Email {} is already verified.", email);
+                return true;
+            }
             if (zakaznik.getIdzakaznik().equals(id)) {
                 zakaznik.setStatus("V");
                 zakaznik.setCaspotvrzeni(new Timestamp(System.currentTimeMillis()));

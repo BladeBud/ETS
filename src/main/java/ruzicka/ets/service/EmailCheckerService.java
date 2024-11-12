@@ -263,7 +263,13 @@ public File generateTicketFile(Objednavka order, String seatName) throws IOExcep
             contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);
             contentStream.beginText();
             contentStream.newLineAtOffset(50, 750);
-            contentStream.showText("Jméno: " + order.getIdzakaznik().getJmeno());
+            //contentStream.showText("Jméno: " + order.getIdzakaznik().getJmeno());
+            contentStream.showText("Maturitní ples GJH");
+            contentStream.endText();
+
+            contentStream.beginText();
+            contentStream.newLineAtOffset(50, 730);
+            contentStream.showText("4/12/2024 19:00 Velký sál Lucerna");
             contentStream.endText();
 
             contentStream.beginText();

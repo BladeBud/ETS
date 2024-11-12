@@ -94,7 +94,7 @@ public class ObjednavkaService {
             }
 
             log.info("Order with ID {} set to expired and associated seats and tables restored", objednavka.getId());
-            importantLog.info("Order with ID {} set to expired and associated seats and tables restored", objednavka.getId());
+           // importantLog.info("Order with ID {} set to expired and associated seats and tables restored", objednavka.getId());
         }
     }
 //------------------------------------------------------------------------------------------------
@@ -117,6 +117,11 @@ public class ObjednavkaService {
         Optional<Zakaznik> zakaznik = zakaznikRepository.findByMail(orderRequest.getMail());
         if (zakaznik.isEmpty()) {
             log.warn("Zakaznik with mail {} does not exist.", orderRequest.getMail());
+            return null;
+        }
+
+        if (!"V".equals(zakaznik.get().getStatus())) {
+            log.warn("Zakaznik with mail {} is not verified.", orderRequest.getMail());
             return null;
         }
 
