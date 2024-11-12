@@ -264,13 +264,9 @@ public File generateTicketFile(Objednavka order, String seatName) throws IOExcep
             contentStream.beginText();
             contentStream.newLineAtOffset(50, 750);
             //contentStream.showText("Jméno: " + order.getIdzakaznik().getJmeno());
-            contentStream.showText("Maturitní ples GJH");
+            contentStream.showText("Maturitní ples GJH 4/12/24 19:00");
             contentStream.endText();
 
-            contentStream.beginText();
-            contentStream.newLineAtOffset(50, 730);
-            contentStream.showText("4/12/2024 19:00 Velký sál Lucerna");
-            contentStream.endText();
 
             contentStream.beginText();
             contentStream.newLineAtOffset(50, 730);
