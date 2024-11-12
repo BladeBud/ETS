@@ -83,12 +83,12 @@ public class EmailCheckerService {
     }
 
     private void checkEmailLoop() {
-        log.info("Starting email checking loop...");
+       // log.info("Starting email checking loop...");
         while (true) {
             try {
-                log.info("Checking for new emails...");
+               // log.info("Checking for new emails...");
                 checkForNewEmails();
-                log.info("Sleeping for 60 seconds before next check...");
+               // log.info("Sleeping for 60 seconds before next check...");
                 Thread.sleep(60000); // Check every 60 seconds
             } catch (Exception e) {
                 log.error("Error in email checking loop", e);
@@ -97,7 +97,7 @@ public class EmailCheckerService {
     }
 //----------------------------------------------------------------------------------------------------------------------
     private void checkForNewEmails() throws MessagingException, IOException {
-        log.info("Connecting to the email server...");
+      //  log.info("Connecting to the email server...");
 
         Properties properties = new Properties();
         properties.put("mail.store.protocol", "imaps");
@@ -134,7 +134,7 @@ public class EmailCheckerService {
                 }
 
                 message.setFlag(Flags.Flag.SEEN, true);
-                log.info("Email marked as read.");
+               // log.info("Email marked as read.");
             } else {
                 log.info("Email is not from the bank. Skipping.");
             }
@@ -142,14 +142,15 @@ public class EmailCheckerService {
 
         inbox.close(false);
         store.close();
-        log.info("Disconnected from the email server.");
+       // log.info("Disconnected from the email server.");
     }
 //----------------------------------------------------------------------------------------------------------------------
-    private boolean isBankEmail(Message message) throws MessagingException {
-        boolean isFromBank = message.getFrom()[0].toString().contains("automat@fio.cz");
-        log.info("Checking if email is from the bank: {}", isFromBank);
-        return isFromBank;
-    }
+private boolean isBankEmail(Message message) throws MessagingException {
+    String fromEmail = message.getFrom()[0].toString();
+    boolean isFromBank = fromEmail.contains("automat@fio.cz") || fromEmail.contains("25heyrovskeho@seznam.cz"); //TODO: change if needed
+    log.info("Checking if email is from the bank: {}", isFromBank);
+    return isFromBank;
+}
 //----------------------------------------------------------------------------------------------------------------------
     private String extractVariableSymbol(String content) {
         Pattern pattern = Pattern.compile("VS:\\s*(\\d+)");

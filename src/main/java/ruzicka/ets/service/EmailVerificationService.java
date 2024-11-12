@@ -45,7 +45,7 @@ public class EmailVerificationService {
      */
     public void sendVerificationEmail(Zakaznik zakaznik, String subject, String messageContent) {
         try {
-            log.info("Preparing to send verification email to customer email: {}", zakaznik.getMail());
+           // log.info("Preparing to send verification email to customer email: {}", zakaznik.getMail());
 
             Integer zakaznikId = zakaznik.getIdzakaznik();
 

@@ -2,6 +2,7 @@ package ruzicka.ets.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ruzicka.ets.db.MistoObjednavka;
 import ruzicka.ets.db.Objednavka;
 import ruzicka.ets.db.Stul;
@@ -103,7 +104,7 @@ public class ObjednavkaService {
      * @param orderRequest the details of the order
      * @return the created Objednavka object
      */
-
+    @Transactional
     public synchronized Objednavka createOrder(OrderRequestDTO orderRequest) {
         log.info("Attempting to create order for tables: {} and quantities: {}", orderRequest.getNazvy(), orderRequest.getQuantities());
 
@@ -118,6 +119,7 @@ public class ObjednavkaService {
             log.warn("Zakaznik with mail {} does not exist.", orderRequest.getMail());
             return null;
         }
+
 
         List<String> tableNames = orderRequest.getNazvy();
         List<Integer> quantities = orderRequest.getQuantities();
