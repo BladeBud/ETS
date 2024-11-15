@@ -184,6 +184,11 @@ private boolean isBankEmail(Message message) throws MessagingException {
             if (orderOpt.isPresent()) {
                 Objednavka order = orderOpt.get();
 
+                if ("E".equals(order.getStatus())) {
+                    log.warn("Order with symbol {} is expired. No email will be sent.", variableSymbol);
+                    return false;
+                }
+
                 if (order.getCena() == amount) {
                     order.setStatus("P");
                     objednavkaRepository.save(order);
