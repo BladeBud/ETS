@@ -12,6 +12,6 @@ import java.util.Optional;
  */
 @Repository
 public interface ZakaznikRepository extends JpaRepository<Zakaznik, Integer> {
+//----------------------------------------------------------------------------------------------------------------------
     Optional<Zakaznik> findByMail(String mail);
-    Optional<Zakaznik> findByMailAndStatus(String mail, String status);
 }
