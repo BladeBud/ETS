@@ -31,9 +31,11 @@ import org.springframework.stereotype.Service;
 import ruzicka.ets.db.Misto;
 import ruzicka.ets.db.MistoObjednavka;
 import ruzicka.ets.db.Objednavka;
+import ruzicka.ets.db.Stul;
 import ruzicka.ets.db.Zakaznik;
 import ruzicka.ets.repository.MistoRepository;
 import ruzicka.ets.repository.ObjednavkaRepository;
+import ruzicka.ets.repository.StulRepository;
 import ruzicka.ets.repository.ZakaznikRepository;
 
 import javax.imageio.ImageIO;
@@ -72,6 +74,9 @@ public class EmailCheckerService {
 
     @Autowired
     private MistoRepository mistoRepository;
+
+    @Autowired
+    private StulRepository stulRepository;
 //----------------------------------------------------------------------------------------------------------------------
     @PostConstruct
     public void init() {
@@ -185,9 +190,49 @@ private boolean isBankEmail(Message message) throws MessagingException {
                 Objednavka order = orderOpt.get();
 
                 if ("E".equals(order.getStatus())) {
-                    log.warn("Order with symbol {} is expired. No email will be sent.", variableSymbol);
-                    return false;
+                    log.warn("Order with symbol {} is expired. Checking availability of ordered places...", variableSymbol);
+
+                    // Check if all ordered places are still available
+                    boolean allPlacesAvailable = order.getMistoObjednavkaList().stream()
+                            .allMatch(mistoObjednavka -> {
+                                Optional<Misto> mistoOpt = mistoRepository.findById(mistoObjednavka.getIdmisto());
+                                return mistoOpt.isPresent() && Misto.Status.A.name().equals(mistoOpt.get().getStatus());
+                            });
+
+                    if (!allPlacesAvailable) {
+                        log.warn("Not all ordered places are available for expired order: {}", variableSymbol);
+                        return false;
+                    }
+
+                    // Check if the payment amount matches the order's total price
+                    if (order.getCena() != amount) {
+                        log.warn("Amount mismatch for expired order: {}", variableSymbol);
+                        return false;
+                    }
+
+                    // Reserve the places
+                    for (MistoObjednavka mistoObjednavka : order.getMistoObjednavkaList()) {
+                        Optional<Misto> mistoOpt = mistoRepository.findById(mistoObjednavka.getIdmisto());
+                        if (mistoOpt.isPresent()) {
+                            Misto misto = mistoOpt.get();
+                            misto.setStatus(Misto.Status.R.name());
+                            mistoRepository.save(misto);
+
+                            Stul stul = misto.getStul();
+                            stul.setAvailableQuantity(stul.getAvailableQuantity() - 1);
+                            stulRepository.save(stul);
+                        }
+                    }
+
+                    order.setStatus("P");
+                    objednavkaRepository.save(order);
+
+                    sendTicketEmail(order);
+
+                    importantLog.info("Expired order with symbol {} is now paid and places are reserved.", variableSymbol);
+                    return true;
                 }
+
 
                 if (order.getCena() == amount) {
                     order.setStatus("P");
