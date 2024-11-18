@@ -2,6 +2,10 @@ package ruzicka.ets.dto;
 
 import java.util.List;
 
+/**
+ * @author ruzicka
+ * Data Transfer Object (DTO) class for order request.
+ */
 public class OrderRequestDTO {
 //--------------------------------------------------------------------------------
     private List<String> nazvy; // List of table names

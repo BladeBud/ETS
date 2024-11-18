@@ -5,7 +5,7 @@ package ruzicka.ets.sql;
  * @since 2024-10-10
  */
 public class SqlFillerMisto {
-
+//----------------------------------------------------------------------------------------------------------------------
     public static void main(String[] args) {
         StringBuilder sql = new StringBuilder();
         int idMisto = 1; // Start from the first idMisto
