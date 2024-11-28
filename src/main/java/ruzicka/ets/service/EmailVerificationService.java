@@ -64,7 +64,7 @@ public class EmailVerificationService {
             log.info("Verification email sent to {}", zakaznik.getMail());
         } catch (Exception e) {
             log.error("Failed to send verification email to {}: {}", zakaznik.getMail(), e.getMessage());
-            e.printStackTrace(); // Outputs full stack trace for debugging
+           // e.printStackTrace(); // Outputs full stack trace for debugging
         }
     }
 //----------------------------------------------------------------------------------------------------------------------
