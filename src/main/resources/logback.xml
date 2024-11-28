@@ -49,7 +49,7 @@
     <logger name="ruzicka.ets" level="DEBUG" />
 
     <!-- Logger for important information only -->
-    <logger name="importantLogger" level="INFO" additivity="false">
+    <logger name="important" level="INFO" additivity="false">
         <appender-ref ref="IMPORTANT" />
     </logger>
 </configuration>
