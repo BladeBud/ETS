@@ -33,6 +33,7 @@ import java.util.Optional;
 public class TicketController {
 //----------------------------------------------------------------------------------------------------------------------
     private static final Logger importantLog = LoggerFactory.getLogger("important");
+    private static final Logger log = LoggerFactory.getLogger(TicketController.class);
 
     @Autowired
     private ZakaznikRepository zakaznikRepository;
@@ -60,10 +61,10 @@ public class TicketController {
             Zakaznik user = existingUser.get();
             if ("V".equals(user.getStatus())) { // Verified
                 List<Objednavka> orders = objednavkaRepository.findByIdzakaznik_Idzakaznik(user.getIdzakaznik());
-                importantLog.info("User with email {} logged in successfully.", email);
+                log.info("User with email {} logged in successfully.", email);
                 return ResponseEntity.ok(orders);
             } else {
-                importantLog.warn("User with email {} attempted to log in without verifying email.", email);
+                log.warn("User with email {} attempted to log in without verifying email.", email);
                 return ResponseEntity.status(403).body("Please verify your email.");
             }
         } else {
@@ -94,10 +95,10 @@ public class TicketController {
         boolean verified = emailService.verifyEmail(email, id);
 
         if (verified) {
-            importantLog.info("Email verified successfully for email: {}", email);
+            log.info("Email verified successfully for email: {}", email);
             return ResponseEntity.ok("Email ověřen úspěšně. <a href=\"https://www.plesgymjh.cz/selection.html\">Lístky si objednejte zde</a>");
         } else {
-            importantLog.warn("Email verification failed for email: {}", email);
+            log.warn("Email verification failed for email: {}", email);
             return ResponseEntity.status(404).body("Email se nepovedlo ověřit.");
         }
     }

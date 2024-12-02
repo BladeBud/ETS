@@ -201,12 +201,14 @@ private boolean isBankEmail(Message message) throws MessagingException {
 
                     if (!allPlacesAvailable) {
                         log.warn("Not all ordered places are available for expired order: {}", variableSymbol);
+                        importantLog.warn("Not all ordered places are available for expired order: {}", variableSymbol);
                         return false;
                     }
 
                     // Check if the payment amount matches the order's total price
                     if (order.getCena() != amount) {
                         log.warn("Amount mismatch for expired order: {}", variableSymbol);
+                        importantLog.warn("Amount mismatch for expired order: {}", variableSymbol);
                         return false;
                     }
 
