@@ -24,13 +24,14 @@
         </encoder>
     </appender>
 
-    <appender name="FILEDETAIL" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>./logs/ETS-detail.log</file>
+    <!-- Appender for important events -->
+    <appender name="IMPORTANT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>./logs/important.log</file>
 
         <!-- Define the rolling policy -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- Daily rollover with compression -->
-            <fileNamePattern>./logs/ETSD.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <fileNamePattern>./logs/important.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
         </rollingPolicy>
         <encoder>
             <charset>UTF-8</charset>
@@ -48,7 +49,7 @@
     <logger name="ruzicka.ets" level="DEBUG" />
 
     <!-- Logger for important information only -->
-    <logger name="importantLogger" level="INFO" additivity="false">
-        <appender-ref ref="FILEDETAIL" />
+    <logger name="important" level="INFO" additivity="false">
+        <appender-ref ref="IMPORTANT" />
     </logger>
 </configuration>

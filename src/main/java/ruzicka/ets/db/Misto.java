@@ -10,12 +10,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+
 /**
  * @author czech
  * @since 2024-09-30
- */
-
-/**
  * Represents a 'misto' entity with details such as address, type, availability, and quantity information.
  */
 @Entity
@@ -78,6 +76,6 @@ public class Misto {
     }
 
     public enum Status {
-        A, R
+        A, R // Available, Reserved (Reserved can also be permanent, as for already paid orders)
     }
 }

@@ -1,6 +1,8 @@
 package ruzicka.ets.dto;
 
 /**
+ *  @Author ruzicka
+ *  @since 2024-11-08
  * Data Transfer Object for returning order details in response to API calls.
  * This class encapsulates the necessary information about an order, including
  * the customer's ID, the price of the order, and the associated bank account number.

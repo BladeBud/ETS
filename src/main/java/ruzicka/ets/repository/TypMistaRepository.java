@@ -10,5 +10,6 @@ import ruzicka.ets.db.Typmista;
  */
 @Repository
 public interface TypMistaRepository extends JpaRepository<Typmista, Integer> {
+//----------------------------------------------------------------------------------------------------------------------
     Typmista findByTypMista(String typMista);
 }

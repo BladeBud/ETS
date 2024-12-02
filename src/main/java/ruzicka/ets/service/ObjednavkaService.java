@@ -94,7 +94,7 @@ public class ObjednavkaService {
             }
 
             log.info("Order with ID {} set to expired and associated seats and tables restored", objednavka.getId());
-           // importantLog.info("Order with ID {} set to expired and associated seats and tables restored", objednavka.getId());
+           importantLog.info("Order with ID {} set to expired and associated seats and tables restored", objednavka.getId());
         }
     }
 //------------------------------------------------------------------------------------------------

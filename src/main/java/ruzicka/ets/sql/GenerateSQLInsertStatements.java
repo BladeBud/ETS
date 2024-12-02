@@ -2,8 +2,11 @@ package ruzicka.ets.sql;
 
 import java.util.*;
 
+/**
+ * Generates SQL INSERT statements for the "misto" table.
+ */
 public class GenerateSQLInsertStatements {
-
+//----------------------------------------------------------------------------------------------------------------------
     public static void main(String[] args) {
         // Pre-defined available quantities for stul IDs
         Map<Integer, Integer> stulData = new HashMap<>();

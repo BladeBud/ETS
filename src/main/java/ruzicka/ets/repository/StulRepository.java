@@ -12,5 +12,6 @@ import ruzicka.ets.db.Stul;
 
 @Repository
 public interface StulRepository extends JpaRepository<Stul, Integer> {
+//----------------------------------------------------------------------------------------------------------------------
     Stul findByNazev(String adresa);
 }

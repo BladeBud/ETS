@@ -13,7 +13,6 @@ import java.util.List;
 
 @Repository
 public interface MistoObjednavkaRepository extends JpaRepository<MistoObjednavka, Integer> {
-    int countByIdobjednavka(Integer id);
-
+//----------------------------------------------------------------------------------------------------------------------
     List<MistoObjednavka> findByIdobjednavka(Integer id);
 }

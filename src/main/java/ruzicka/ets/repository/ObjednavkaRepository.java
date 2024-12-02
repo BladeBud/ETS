@@ -13,13 +13,11 @@ import java.util.List;
  */
 @Repository
 public interface ObjednavkaRepository extends JpaRepository<Objednavka, Integer> {
+//----------------------------------------------------------------------------------------------------------------------
     List<Objednavka> findByIdzakaznik_Idzakaznik(Integer idzakaznik);
 
     List<Objednavka> findByStatusAndId(String variableSymbol,Integer idzakaznik);
 
     List<Objednavka> findByDatumcasBeforeAndStatus(Instant tenMinutesAgo, String res);
 
-    //List<Objednavka> findByIdmisto_AdresaAndStatus(Integer adresa, String r);
-
-    //  List<Objednavka> findByZakaznikIdzakaznik(Integer zakaznikId);
 }
