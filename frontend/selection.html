@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="cz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maturitní ples 1111/12</title>
+</head>
+<body onload="OnLoad()">
+    <script>
+        /*to prevent Firefox FOUC, this must be here*/
+        let FF_FOUC_FIX;
+      </script>
+    <div>
+        <h1 class="title">Maturitní ples</h1>
+        <h2 class="title">1. 11. 1111</h2>
+    </div>
+
+    <section class="priceList">
+        <div class="ticket">
+            <span class="ticketName">Místo na stání</span><span class="ticketPrice">300 Kč</span>
+        </div>
+        <div class="ticket">
+            <span class="ticketName">Stůl bez výhledu</span><span class="ticketPrice">500 Kč</span>
+        </div>
+        <div class="ticket">
+            <span class="ticketName">Stůl s výhledem</span><span class="ticketPrice">600 Kč</span>
+        </div>
+        <div class="ticket">
+            <span class="ticketName">Lóže</span><span class="ticketPrice">700 Kč</span>
+        </div>
+    </section>
+
+    <h4 class="title" style="color: red;">Místa v rámci stolů a lóží nejsou číslována!<br>Pro výběr klikněte na požadovaný stůl</h4>
+
+    <div style="display: flex; justify-content: center; margin-bottom: 10px; position: relative; padding: 0%;">
+        <img id="legend" src="resources/legend.svg" alt="Legenda k plánku. Pokud se nezobrazuje, zkontrolujte povolení prohlížeče, načtěte stránku znovu a vyčkejte">
+    </div>
+
+    <div style="display: flex; justify-content: center;">
+        <div id="floorPlan">
+            <img id="lucernaPlan" src="resources/lucernaPlan.svg" alt="Plánek Lucerny. Pokud se nezobrazuje, zkontrolujte povolení prohlížeče, načtěte stránku znovu a vyčkejte">
+        </div>
+    </div>
+
+    <div id="standingDiv">
+        <span style="width: 27%; display: inline-block; vertical-align: middle;">Místa na stání:</span>
+        <span style="width: 10%; display: inline-block; vertical-align: middle;"><button id="minusBtn" onclick="StandingMinus();" type="submit">-</button></span>
+        <span style="width: 5%; display: inline-block; vertical-align: middle;" id="standingCount">0</span>
+        <span style="width: 10%; display: inline-block; vertical-align: middle;"><button id="plusBtn" onclick="StandingPlus();" type="submit">+</button></span>
+    </div>
+
+    <h4 class="title">Svůj výběr můžete zrušit pomocí tlačitka níže:</h4>
+
+    <div id="summaryDiv"></div>
+
+    <section class="personalInfoSec">
+        <!--<div class="information">
+            <span>Jméno a příjmení</span>
+            <span><input class="inputField" type="text" name="name"></span>
+        </div>-->
+        <div class="information">
+            <span>Platný email</span>
+            <span><input class="inputField" type="email" name="email" id="emailInput"></span>
+        </div>
+        <div class="information">
+            <span style="text-align: center; width: 100%; display: inline-block; margin-top: 10px;">Nákupem souhlasíte s <a href="resources/Obchodní podmínky.pdf" target="_blank">obchodními podmínkami</a></span>
+        </div>
+        <div class="information">
+            <span style="color: red; text-align: center; width: 100%; display: inline-block;">Pozor, na platbu budete mít 25 minut.<br>Bude možné ji provést QR kódem nebo okamžitou platbou na účet.</span>
+        </div>
+        <div class="buttonDiv">
+            <button class="button" type="button" onclick="PayButtonClick()" id="payButton">Pokračovat k platbě</button>
+        </div>
+    </section>
+
+    <h4 class="title" id="notVerified" style="display: none;">Vypadá to, že tento email ještě není ověřen. Zaslali jsme Vám na něj odkaz, kterým ho ověříte.</h4>
+    <h4 class="title" id="errorText" style="color: red; white-space: pre; display: none;">Něco se nepovedlo; je možné, že Vám místa někdo zabral.<br>Zkuste si stránku znovu načíst a akci zopakovat.</h4>
+
+    <section id="paymentOverview" style="display: none;">
+        <div class="information">
+            <span><image scr="" id="qrCode"></span>
+            <span id="paymentOverviewInfo">Číslo účtu: <br>Částka: <br>Variabilní symbol: </span>
+        </div>
+        <h4 class="title">Po zaplacení Vám vstupenky dorazí na email</h4>
+        <h4 id="timer" class="title" style="color: red; white-space: pre;"></h4>
+    </section>
+</body>
+<link rel="stylesheet" href="selection.css">
+<script src="selection.js"></script>
+</html>

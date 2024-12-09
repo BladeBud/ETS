@@ -1,0 +1,117 @@
+body{
+    background-color: #121212;
+    color:azure;
+}
+
+.title{
+    text-align: center;
+    font-family: "Abhaya Libre", serif;
+    font-weight: 500;
+    font-style: normal;
+}
+
+#inputDiv{
+    width: 30%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 5px;
+    min-width: 300px;
+}
+
+#mailInput{
+    width: 80%;
+    color: white;
+    background-color: transparent;
+    border: 1px solid;
+    border-radius: 5px;
+    padding: 3px;
+}
+
+#verifyBtn{
+    width: 15%; 
+    float: right;
+    color: white;
+    background-color: transparent;
+    border: 1px solid;
+    border-radius: 5px;
+    padding: 3px;
+    cursor: pointer;
+}
+
+#instructionText{
+    text-align: center;
+    display: none; 
+    color: aqua;
+}
+
+#errorText{
+    text-align: center; 
+    display: none; 
+    color: red;
+}
+
+#alreadySentText{
+    text-align: center; 
+    display: none; 
+    color: aqua;
+}
+
+#alreadyVerifiedText{
+    text-align: center; 
+    display: none; 
+    color: aqua;
+}
+
+#unexpectedErrorText{
+    text-align: center; 
+    display: none; 
+    color: red;
+}
+
+#dropdownDiv {
+    cursor: pointer;
+    user-select: none;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20px;
+    max-width: fit-content;
+    text-align: center;
+    font-weight: bold;
+    color: aquamarine;
+    border: 1px solid aquamarine;
+    border-radius: 5px;
+    padding: 3px;
+}
+
+#arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.arrowRotated {
+    transform: rotate(90deg);
+}
+
+#notnumberedText {
+    text-align: center; 
+    color: red;
+}
+
+#legend{
+    width: 15%;
+    max-width: 100%;
+    min-width: 200px;
+}
+
+#floorPlan{
+    position: relative;
+    display: flex;
+    justify-content: center;
+    padding: 0%;
+}
+
+#lucernaPlan{
+    width: 100%;
+    max-width: 100%;
+    min-width: 400px;
+}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="cz">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Maturitní ples 1111/12</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@500&display=swap" rel="stylesheet">
+    </head>
+<body onload="onLoad()">
+    <div style="margin-bottom: 50px;">
+        <h1 class="title">Maturitní ples</h1>
+        <h2 class="title">1. 11. 1111</h2>
+    </div>
+    
+    <h4 class="title">Abychom mohli pokračovat, budeme muset ověřit Váš e-mail:</h2>
+    <div id="inputDiv">
+        <span><input id="mailInput" type="email" placeholder=" Sem zadejte Váš e-mail"></span>
+        <span><button id="verifyBtn" type="submit">Ověřit</button></span>
+    </div>
+    <h4 id="instructionText">Každou chvíli by Vám měl dorazil e-mail s odkazem a instrukcemi</h4>
+    <h4 id="errorText">Prosím, zadejte platnou e-mailovou adresu</h4>
+    <h4 id="alreadySentText">E-mail už jsme Vám odeslali, pokud nedorazil, vyčkejte prosím</h4>
+    <h4 id="alreadyVerifiedText">Váš e-mail už je ověřen</h4>
+    <h4 id="unexpectedErrorText">Došlo k chybě, prosím, zkuste to znovu později</h4>
+
+    <div id="pastOrders">
+    </div>
+
+
+    <div id="dropdownDiv">
+        <span id="arrow">►</span> Chci se jen podívat, která místa jsou volná
+    </div>
+
+    <div id="floorPlanDiv">
+        <h4 id="notnumberedText">Místa v rámci stolů a lóží nejsou číslována!</h4>
+        <div style="display: flex; justify-content: center; margin-bottom: 10px; position: relative; padding: 0%;">
+            <img id="legend" src="resources/legendViewonly.svg" alt="Legenda k plánku. Pokud se nezobrazuje, zkontrolujte povolení prohlížeče, načtěte stránku znovu a vyčkejte">
+        </div>
+        <div style="display: flex; justify-content: center;">
+            <div id="floorPlan">
+                <img id="lucernaPlan" src="resources/lucernaPlan.svg" alt="Plánek Lucerny. Pokud se nezobrazuje, zkontrolujte povolení prohlížeče, načtěte stránku znovu a vyčkejte">
+            </div>
+        </div>
+    </div>
+</body>
+
+<script src="verify.js"></script>
+<link rel="stylesheet" href="verify.css">
+</html>

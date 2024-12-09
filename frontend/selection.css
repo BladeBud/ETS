@@ -1,0 +1,104 @@
+body{
+    background-color: #121212;
+    color:azure;
+}
+
+.title{
+    text-align: center;
+}
+
+.priceList{
+    width: 30%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 50px;
+    min-width: 200px;
+}
+
+.ticket{
+    border-bottom: 1px dashed #aaa;
+}
+
+.ticketPrice{
+    float: right;
+}
+
+#legend{
+    width: 25%;
+    max-width: 100%;
+    min-width: 250px;
+}
+
+#floorPlan{
+    position: relative;
+    display: flex;
+    justify-content: center;
+    padding: 0%;
+}
+
+#lucernaPlan{
+    width: 100%;
+    max-width: 100%;
+    min-width: 400px;
+}
+
+#standingDiv{
+    width: 30%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20px;
+    margin-bottom: 5px;
+    min-width: 300px;
+    display: flex;
+    justify-content: center;
+}
+
+#summaryDiv{
+    width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 5px;
+    min-width: 450px;
+}
+
+.personalInfoSec{
+    margin-top: 30px;
+}
+
+.information{
+    width: 30%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 5px;
+    min-width: 300px;
+}
+
+.inputField{
+    float: right;
+}
+
+.buttonDiv{
+    display: flex;
+    justify-content: center;
+}
+
+.button{
+    width: 30%;
+    min-width: 300px;
+}
+
+#paymentOverview{
+    margin-top: 10px;
+    display: none;
+}
+
+#qrCode{
+    width: 15%;
+    min-width: 150px;
+}
+
+#paymentOverviewInfo{
+    float: right;
+    width: 50%;
+    white-space: pre;
+}
