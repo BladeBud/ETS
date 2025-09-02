@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+	  
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Systém kontroly lístků</title>
+		
+		<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" type="text/javascript"></script>
+		
+		<style>
+			body {
+				padding: 5%;
+				display: block;
+			}
+			
+			#top-menu {
+				width: 90%;
+				margin: auto;
+				height: 10vh;
+			}
+
+			#qr-scanner {
+				width: 90%;
+				margin: auto;
+			}
+
+			#info-box {
+				width: 90%;
+				margin: auto;
+				text-align: center;
+				padding: 10% 0;
+			}
+		</style>
+	</head>
+	
+	<body>
+
+		<div id="top-menu"></div>
+		<div id="qr-scanner"></div>
+		<div id="info-box">skenování dalšího lístku zahájíte kliknutím na výsledek předchozího</div>
+
+		<script>
+		
+			function logging(text){
+				console.log(text);
+			}
+
+			function onScanSuccess(qrCodeText) {
+			
+				console.log(`QR code scanned: ${qrCodeText}`);
+				//fetch("/logqrcode="+qrCodeText);
+				
+				html5QrcodeScanner.pause();
+
+				qrCodeText = qrCodeText.toLowerCase();
+				
+				const match = qrCodeText.match(/^id objednávky: (\d+), jméno: (.*)$/);
+				
+				if (match){ // valid format
+					console.log(parseInt(match[1],10), match[2]);
+					
+					let id = parseInt(match[1],10);
+
+					if (!document.location.href.endsWith("#offline")){ // fallback solution
+					
+						fetch("/ticket="+id.toString()).then(function (response){response.text().then(function(text){
+
+							if (response.ok) {
+
+								if (text == "OK") {
+									document.querySelector("#info-box").style.backgroundColor = "green";
+									document.querySelector("#info-box").innerText = "platný lístek";
+									navigator.vibrate(50);
+								}
+								else if (text == "DUP") {
+									document.querySelector("#info-box").style.backgroundColor = "red";
+									document.querySelector("#info-box").innerText = "duplikovaný lístek";
+								}
+								else if (text == "FAKE") {
+									document.querySelector("#info-box").style.backgroundColor = "red";
+									document.querySelector("#info-box").innerText = "neplatný lístek";
+								}
+								else {
+									document.querySelector("#info-box").style.backgroundColor = "yellow";
+									document.querySelector("#info-box").innerText = "chyba odpovědi serveru";
+								}
+
+								console.log(text);
+							}
+
+							else {
+								document.querySelector("#info-box").style.backgroundColor = "yellow";
+								document.querySelector("#info-box").innerText = "chyba komunikace se serverem";
+
+								console.log(response);
+							}
+
+						})});
+
+					}
+					
+					else {
+						document.querySelector("#info-box").style.backgroundColor = "green";
+						document.querySelector("#info-box").innerText = "platný lístek";
+						navigator.vibrate(50);
+					}
+					
+				}
+				else {
+					document.querySelector("#info-box").style.backgroundColor = "orange";
+					document.querySelector("#info-box").innerText = "neplatný formát";
+				}
+
+			}
+
+			function onScanFailure(error) {
+				console.warn(`QR code scan error: ${error}`);
+			}
+
+			let html5QrcodeScanner = new Html5QrcodeScanner( "qr-scanner", { fps: 10, qrbox: 250 } );  // https://scanapp.org/html5-qrcode-docs/docs/intro
+			html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+			
+			document.querySelector("#info-box").onclick = function(){
+				html5QrcodeScanner.resume();
+				
+				document.querySelector("#info-box").style.backgroundColor = "white";
+				document.querySelector("#info-box").innerText = "skenování";		
+			};
+			
+		</script>
+
+	</body>
+
+</html>
